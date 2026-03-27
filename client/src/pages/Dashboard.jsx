@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { StatusBadge, UrgencyBadge, STATUSES } from '../components/StatusBadge.jsx';
 
 function timeAgo(iso) {
@@ -13,15 +13,21 @@ function timeAgo(iso) {
   return new Date(iso).toLocaleDateString();
 }
 
+const URGENCY_BORDER = {
+  high: '#ef4444',
+  medium: '#f59e0b',
+  low: 'transparent',
+};
+
 export default function Dashboard() {
   const [intakes, setIntakes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [urgencyFilter, setUrgencyFilter] = useState('all');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchIntakes();
-    // Poll every 10s so new intakes show up during demo
     const interval = setInterval(fetchIntakes, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -42,100 +48,179 @@ export default function Dashboard() {
   });
 
   const urgentCount = intakes.filter((i) => i.urgencyFlag === 'high' && i.status !== 'closed').length;
+  const activeFilters = statusFilter !== 'all' || urgencyFilter !== 'all';
+
+  const selectStyle = {
+    padding: '0.4rem 0.6rem',
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--color-border-light)',
+    fontSize: 'var(--text-sm)',
+    color: 'var(--color-text-primary)',
+    background: 'var(--color-surface)',
+    fontFamily: 'inherit',
+  };
 
   return (
-    <div className="page" style={{ maxWidth: '960px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.75rem' }}>
-        <h1 style={{ fontSize: '1.4rem' }}>Staff Dashboard</h1>
-        <span style={{ color: '#888', fontSize: '0.85rem' }}>
-          {intakes.length} intake{intakes.length !== 1 ? 's' : ''}
-          {urgentCount > 0 && <span style={{ color: '#dc2626', fontWeight: 600 }}> &middot; {urgentCount} urgent</span>}
-        </span>
-      </div>
-
-      {/* Filters */}
-      <div className="card" style={{ padding: '0.6rem 1rem', marginBottom: '0.75rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#666' }}>Filter:</span>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ padding: '0.3rem 0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.85rem' }}
-        >
-          <option value="all">All statuses</option>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>{s.replaceAll('_', ' ')}</option>
-          ))}
-        </select>
-        <select
-          value={urgencyFilter}
-          onChange={(e) => setUrgencyFilter(e.target.value)}
-          style={{ padding: '0.3rem 0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.85rem' }}
-        >
-          <option value="all">All urgency</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-        </select>
-        {(statusFilter !== 'all' || urgencyFilter !== 'all') && (
-          <button
-            onClick={() => { setStatusFilter('all'); setUrgencyFilter('all'); }}
-            style={{ fontSize: '0.8rem', color: '#1a5632', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
-
-      {/* Table */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>Loading...</div>
-        ) : filtered.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>
-            {intakes.length === 0
-              ? 'No intakes yet. Complete an intake from the "New Intake" page to see it here.'
-              : 'No intakes match the current filters.'}
+    <div className="page">
+      <div className="layout-dashboard">
+        {/* Header bar */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '0.85rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+            <h1 style={{
+              fontSize: 'var(--text-xl)',
+              fontWeight: 700,
+              color: 'var(--color-text-primary)',
+              letterSpacing: '-0.01em',
+            }}>
+              Dashboard
+            </h1>
+            <span style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--color-text-tertiary)',
+            }}>
+              {intakes.length} intake{intakes.length !== 1 ? 's' : ''}
+            </span>
+            {urgentCount > 0 && (
+              <span style={{
+                fontSize: 'var(--text-xs)',
+                fontWeight: 700,
+                color: 'var(--color-crisis-text)',
+                background: 'var(--color-crisis-bg)',
+                padding: '0.2rem 0.55rem',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--color-crisis-border)',
+              }}>
+                {urgentCount} urgent
+              </span>
+            )}
           </div>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left', background: '#fafafa' }}>
-                <th style={th}>Client</th>
-                <th style={th}>Category</th>
-                <th style={th}>Urgency</th>
-                <th style={th}>Status</th>
-                <th style={th}>Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((intake) => (
-                <tr
-                  key={intake.id}
-                  style={{
-                    borderBottom: '1px solid #e5e7eb',
-                    background: intake.crisisFlag ? '#fef2f2' : intake.urgencyFlag === 'high' ? '#fffbeb' : 'white',
-                  }}
-                >
-                  <td style={td}>
-                    <Link to={`/dashboard/${intake.id}`} style={{ color: '#1a5632', fontWeight: 500, textDecoration: 'none' }}>
-                      {intake.clientName || '(unnamed)'}
-                    </Link>
-                  </td>
-                  <td style={td}>{intake.needCategory || '—'}</td>
-                  <td style={td}>
-                    <UrgencyBadge level={intake.urgencyFlag} crisisFlag={intake.crisisFlag} />
-                  </td>
-                  <td style={td}><StatusBadge status={intake.status} /></td>
-                  <td style={{ ...td, color: '#888', fontSize: '0.85rem' }}>{timeAgo(intake.updatedAt)}</td>
-                </tr>
+
+          {/* Inline filters */}
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={selectStyle}>
+              <option value="all">All statuses</option>
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>{s.replaceAll('_', ' ')}</option>
               ))}
-            </tbody>
-          </table>
-        )}
+            </select>
+            <select value={urgencyFilter} onChange={(e) => setUrgencyFilter(e.target.value)} style={selectStyle}>
+              <option value="all">All urgency</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            {activeFilters && (
+              <button
+                onClick={() => { setStatusFilter('all'); setUrgencyFilter('all'); }}
+                style={{
+                  fontSize: 'var(--text-xs)',
+                  color: 'var(--color-brand)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  padding: '0.25rem 0.4rem',
+                }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          {loading ? (
+            <div style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: 'var(--text-sm)' }}>
+              Loading...
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: 'var(--text-sm)' }}>
+              {intakes.length === 0
+                ? 'No intakes yet. Complete an intake to see it here.'
+                : 'No intakes match the current filters.'}
+            </div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                  <th style={th}>Client</th>
+                  <th style={th}>Category</th>
+                  <th style={th}>Urgency</th>
+                  <th style={th}>Status</th>
+                  <th style={{ ...th, textAlign: 'right' }}>Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((intake) => {
+                  const borderColor = intake.crisisFlag
+                    ? '#ef4444'
+                    : URGENCY_BORDER[intake.urgencyFlag] || 'transparent';
+                  const rowBg = intake.crisisFlag
+                    ? 'var(--color-crisis-bg)'
+                    : intake.urgencyFlag === 'high'
+                      ? 'var(--color-urgent-bg)'
+                      : 'var(--color-surface)';
+
+                  return (
+                    <tr
+                      key={intake.id}
+                      className="intake-row"
+                      onClick={() => navigate(`/dashboard/${intake.id}`)}
+                      style={{
+                        borderBottom: '1px solid var(--color-border-light)',
+                        borderLeft: `4px solid ${borderColor}`,
+                        background: rowBg,
+                      }}
+                    >
+                      <td style={td}>
+                        <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>
+                          {intake.clientName || '(unnamed)'}
+                        </span>
+                      </td>
+                      <td style={{ ...td, color: 'var(--color-text-secondary)' }}>
+                        {intake.needCategory || '\u2014'}
+                      </td>
+                      <td style={td}>
+                        <UrgencyBadge level={intake.urgencyFlag} crisisFlag={intake.crisisFlag} />
+                      </td>
+                      <td style={td}>
+                        <StatusBadge status={intake.status} />
+                      </td>
+                      <td style={{ ...td, color: 'var(--color-text-tertiary)', fontSize: 'var(--text-sm)', textAlign: 'right' }}>
+                        {timeAgo(intake.updatedAt)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-const th = { padding: '0.6rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.03em' };
-const td = { padding: '0.6rem 0.75rem', fontSize: '0.9rem' };
+const th = {
+  padding: '0.65rem 1rem',
+  fontSize: 'var(--text-xs)',
+  fontWeight: 600,
+  color: 'var(--color-text-tertiary)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  textAlign: 'left',
+  background: 'var(--color-surface-raised)',
+};
+
+const td = {
+  padding: '0.75rem 1rem',
+  fontSize: 'var(--text-base)',
+};

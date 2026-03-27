@@ -9,7 +9,6 @@ export default function IntakeDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Staff action state
   const [newStatus, setNewStatus] = useState('');
   const [staffNotes, setStaffNotes] = useState('');
   const [saving, setSaving] = useState(false);
@@ -55,14 +54,20 @@ export default function IntakeDetail() {
   }
 
   if (loading) {
-    return <div className="page"><div className="card" style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>Loading...</div></div>;
+    return (
+      <div className="page" style={{ maxWidth: '700px' }}>
+        <div className="card" style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', padding: '3.5rem', fontSize: 'var(--text-sm)' }}>
+          Loading...
+        </div>
+      </div>
+    );
   }
 
   if (error || !intake) {
     return (
-      <div className="page">
-        <Link to="/dashboard" style={{ color: '#1a5632', fontSize: '0.9rem' }}>&larr; Back to Dashboard</Link>
-        <div className="card" style={{ marginTop: '0.75rem', textAlign: 'center', color: '#dc2626', padding: '2rem' }}>
+      <div className="page" style={{ maxWidth: '700px' }}>
+        <Link to="/dashboard" style={backLinkStyle}>&larr; Dashboard</Link>
+        <div className="card" style={{ marginTop: '0.5rem', textAlign: 'center', color: '#dc2626', padding: '2.5rem' }}>
           {error || 'Intake not found'}
         </div>
       </div>
@@ -73,151 +78,241 @@ export default function IntakeDetail() {
   const updatedDate = new Date(intake.updatedAt).toLocaleString();
 
   return (
-    <div className="page" style={{ maxWidth: '900px' }}>
-      <Link to="/dashboard" style={{ color: '#1a5632', fontSize: '0.9rem', textDecoration: 'none' }}>
-        &larr; Back to Dashboard
-      </Link>
+    <div className="page" style={{ maxWidth: '1100px' }}>
+      <Link to="/dashboard" style={backLinkStyle}>&larr; Dashboard</Link>
 
-      {/* ── Header ── */}
-      <div className="card" style={{ marginTop: '0.75rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div>
-            <h1 style={{ fontSize: '1.4rem', marginBottom: '0.25rem' }}>
-              {intake.clientName || '(unnamed client)'}
-            </h1>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <StatusBadge status={intake.status} />
-              <UrgencyBadge level={intake.urgencyFlag} crisisFlag={intake.crisisFlag} />
-              {intake.needCategory && (
-                <span style={{ fontSize: '0.8rem', color: '#666', background: '#f3f4f6', padding: '0.15rem 0.5rem', borderRadius: '9999px' }}>
-                  {intake.needCategory}
-                </span>
-              )}
-            </div>
-          </div>
-          <div style={{ fontSize: '0.8rem', color: '#888', textAlign: 'right' }}>
-            <div>Created: {createdDate}</div>
-            <div>Updated: {updatedDate}</div>
+      {/* Header strip */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        flexWrap: 'wrap',
+        gap: '0.5rem',
+        marginTop: '0.5rem',
+        marginBottom: '0.85rem',
+      }}>
+        <div>
+          <h1 style={{
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 700,
+            color: 'var(--color-text-primary)',
+            letterSpacing: '-0.02em',
+            marginBottom: '0.35rem',
+          }}>
+            {intake.clientName || '(unnamed client)'}
+          </h1>
+          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <StatusBadge status={intake.status} />
+            <UrgencyBadge level={intake.urgencyFlag} crisisFlag={intake.crisisFlag} />
+            {intake.needCategory && (
+              <span style={{
+                fontSize: 'var(--text-xs)',
+                color: 'var(--color-text-secondary)',
+                background: 'var(--color-surface-raised)',
+                padding: '0.2rem 0.5rem',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--color-border-light)',
+              }}>
+                {intake.needCategory}
+              </span>
+            )}
           </div>
         </div>
-
-        {/* Crisis banner */}
-        {intake.crisisFlag && (
-          <div style={{
-            marginTop: '0.75rem', padding: '0.6rem 0.9rem', background: '#fef2f2',
-            border: '1px solid #fca5a5', borderRadius: '6px', fontSize: '0.85rem', color: '#991b1b',
-          }}>
-            <strong>Crisis indicators detected.</strong> This intake may involve immediate safety concerns. Please prioritize review.
-          </div>
-        )}
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-tertiary)', textAlign: 'right', lineHeight: 1.7 }}>
+          Created {createdDate}<br />
+          Updated {updatedDate}
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gap: '0.75rem', marginTop: '0.75rem' }}>
+      {/* Crisis banner */}
+      {intake.crisisFlag && (
+        <div style={{
+          marginBottom: '0.85rem',
+          padding: '0.65rem 1rem',
+          background: 'var(--color-crisis-bg)',
+          border: '1px solid var(--color-crisis-border)',
+          borderRadius: 'var(--radius-sm)',
+          fontSize: 'var(--text-sm)',
+          color: 'var(--color-crisis-text)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+        }}>
+          <span style={{ fontSize: '0.7rem' }}>&#9679;</span>
+          <span><strong>Crisis indicators detected.</strong> This intake may involve immediate safety concerns.</span>
+        </div>
+      )}
 
-        {/* ── AI Summary ── */}
-        <section className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-            <h2 style={{ ...sectionTitle, marginBottom: 0 }}>AI Summary</h2>
-            {!intake.summary && (
-              <button
-                onClick={fetchIntake}
-                style={{ fontSize: '0.78rem', color: '#1a5632', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-              >
-                Refresh
-              </button>
-            )}
-          </div>
-          {intake.summary ? (
-            <p style={{ color: '#333', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{intake.summary}</p>
-          ) : (
-            <p style={{ color: '#999', fontStyle: 'italic' }}>
-              Summary is still being generated. Click refresh or check back shortly.
-            </p>
-          )}
-          <p style={{ marginTop: '0.5rem', fontSize: '0.72rem', color: '#aaa' }}>
-            This summary was generated by AI and should be verified against the transcript.
-          </p>
-        </section>
-
-        {/* ── Structured Answers ── */}
-        <section className="card">
-          <h2 style={sectionTitle}>Intake Information</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1.5rem' }}>
-            <Field label="Client Name" value={intake.clientName} />
-            <Field label="Preferred Contact" value={intake.contactPreference} />
-            <Field label="Area of Need" value={intake.needCategory} />
-            <Field label="Urgency Level" value={intake.urgencyFlag ? intake.urgencyFlag.charAt(0).toUpperCase() + intake.urgencyFlag.slice(1) : ''} />
-            {intake.structuredAnswers?.situationSummary && (
-              <div style={{ gridColumn: '1 / -1' }}>
-                <Field label="Situation (client's words)" value={intake.structuredAnswers.situationSummary} />
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* ── Transcript ── */}
-        <section className="card">
-          <h2 style={sectionTitle}>Conversation Transcript</h2>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem 0' }}>
-            {intake.transcript && intake.transcript.length > 0 ? (
-              intake.transcript.map((msg, i) => (
-                <ChatMessage key={i} role={msg.role} content={msg.content} />
-              ))
+      <div className="layout-detail">
+        {/* ── Main Column ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          {/* AI Summary */}
+          <section className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+              <h2 style={sectionTitle}>AI Summary</h2>
+              {!intake.summary && (
+                <button onClick={fetchIntake} style={linkBtnStyle}>Refresh</button>
+              )}
+            </div>
+            {intake.summary ? (
+              <p style={{
+                color: 'var(--color-text-primary)',
+                whiteSpace: 'pre-wrap',
+                lineHeight: 1.75,
+                fontSize: 'var(--text-md)',
+              }}>
+                {intake.summary}
+              </p>
             ) : (
-              <p style={{ color: '#999', fontStyle: 'italic' }}>No transcript available.</p>
+              <p style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', fontSize: 'var(--text-sm)' }}>
+                Summary is still being generated. Click refresh or check back shortly.
+              </p>
             )}
-          </div>
-        </section>
+            <p style={{ marginTop: '0.65rem', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+              AI-generated summary. Verify against the transcript below.
+            </p>
+          </section>
 
-        {/* ── Staff Actions ── */}
-        <section className="card" style={{ background: '#fafafa' }}>
-          <h2 style={sectionTitle}>Staff Actions</h2>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-            <div>
-              <label style={fieldLabel}>Update Status</label>
+          {/* Client's own words */}
+          {intake.structuredAnswers?.situationSummary && (
+            <section className="card">
+              <h2 style={sectionTitle}>Client's Own Words</h2>
+              <div style={{
+                borderLeft: '3px solid var(--color-brand-light)',
+                paddingLeft: '1rem',
+                marginLeft: '0.15rem',
+              }}>
+                <p style={{
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 1.75,
+                  fontSize: 'var(--text-md)',
+                  fontStyle: 'italic',
+                  margin: 0,
+                }}>
+                  {intake.structuredAnswers.situationSummary}
+                </p>
+              </div>
+            </section>
+          )}
+
+          {/* Transcript */}
+          <section className="card">
+            <h2 style={{ ...sectionTitle, marginBottom: '0.75rem' }}>Conversation Transcript</h2>
+            <div style={{
+              maxHeight: '560px',
+              overflowY: 'auto',
+              paddingRight: '0.25rem',
+            }}>
+              {intake.transcript && intake.transcript.length > 0 ? (
+                intake.transcript.map((msg, i) => (
+                  <ChatMessage key={i} role={msg.role} content={msg.content} />
+                ))
+              ) : (
+                <p style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', fontSize: 'var(--text-sm)' }}>
+                  No transcript available.
+                </p>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* ── Side Rail ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          {/* Case Info */}
+          <section style={{
+            background: 'var(--color-surface-raised)',
+            borderRadius: 'var(--radius-md)',
+            padding: '1.25rem',
+            border: '1px solid var(--color-border-light)',
+          }}>
+            <h2 style={{ ...sectionTitle, marginBottom: '0.85rem' }}>Case Information</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <Field label="Client Name" value={intake.clientName} />
+              <Field label="Preferred Contact" value={intake.contactPreference} />
+              <Field label="Area of Need" value={intake.needCategory} />
+              <Field label="Urgency" value={intake.urgencyFlag ? intake.urgencyFlag.charAt(0).toUpperCase() + intake.urgencyFlag.slice(1) : ''} />
+              <Field label="Crisis" value={intake.crisisFlag ? 'Yes — flagged' : 'No'} />
+            </div>
+          </section>
+
+          {/* Staff Actions */}
+          <section style={{
+            background: 'var(--color-surface-raised)',
+            borderRadius: 'var(--radius-md)',
+            padding: '1.25rem',
+            border: '1px solid var(--color-border-light)',
+          }}>
+            <h2 style={{ ...sectionTitle, marginBottom: '0.85rem' }}>Staff Actions</h2>
+
+            <div style={{ marginBottom: '0.85rem' }}>
+              <label style={fieldLabel}>Status</label>
               <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
-                style={{ display: 'block', padding: '0.4rem 0.5rem', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.9rem' }}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '0.45rem 0.6rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--color-border-light)',
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-primary)',
+                  background: 'var(--color-surface)',
+                  fontFamily: 'inherit',
+                }}
               >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>{s.replaceAll('_', ' ')}</option>
                 ))}
               </select>
             </div>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              style={{
-                padding: '0.45rem 1.25rem', borderRadius: '6px', border: 'none',
-                background: '#1a5632', color: 'white', fontWeight: 600, fontSize: '0.9rem',
-                cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.6 : 1,
-              }}
-            >
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-            {saveMsg && (
-              <span style={{ fontSize: '0.85rem', color: saveMsg.startsWith('Error') ? '#dc2626' : '#16a34a', fontWeight: 500 }}>
-                {saveMsg}
-              </span>
-            )}
-          </div>
 
-          <div>
-            <label style={fieldLabel}>Staff Notes</label>
-            <textarea
-              value={staffNotes}
-              onChange={(e) => setStaffNotes(e.target.value)}
-              placeholder="Add case notes, follow-up actions, referral details..."
-              rows={4}
-              style={{
-                width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px',
-                border: '1px solid #d1d5db', fontSize: '0.9rem', resize: 'vertical',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
-        </section>
+            <div style={{ marginBottom: '0.85rem' }}>
+              <label style={fieldLabel}>Notes</label>
+              <textarea
+                value={staffNotes}
+                onChange={(e) => setStaffNotes(e.target.value)}
+                placeholder="Case notes, follow-up actions, referrals..."
+                rows={5}
+                style={{
+                  width: '100%',
+                  padding: '0.55rem 0.7rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--color-border-light)',
+                  fontSize: 'var(--text-sm)',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  color: 'var(--color-text-primary)',
+                  lineHeight: 1.65,
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="btn-primary"
+                style={{
+                  fontSize: 'var(--text-sm)',
+                  opacity: saving ? 0.55 : 1,
+                  cursor: saving ? 'wait' : 'pointer',
+                }}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+              {saveMsg && (
+                <span style={{
+                  fontSize: 'var(--text-sm)',
+                  color: saveMsg.startsWith('Error') ? '#dc2626' : 'var(--color-success)',
+                  fontWeight: 500,
+                }}>
+                  {saveMsg}
+                </span>
+              )}
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
@@ -225,14 +320,49 @@ export default function IntakeDetail() {
 
 function Field({ label, value }) {
   return (
-    <div style={{ marginBottom: '0.25rem' }}>
+    <div>
       <div style={fieldLabel}>{label}</div>
-      <div style={{ fontSize: '0.95rem', color: value ? '#1a1a1a' : '#999' }}>
+      <div style={{
+        fontSize: 'var(--text-md)',
+        color: value ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
+        fontWeight: value ? 500 : 400,
+      }}>
         {value || '(not provided)'}
       </div>
     </div>
   );
 }
 
-const sectionTitle = { fontSize: '1rem', fontWeight: 600, marginBottom: '0.6rem', color: '#374151' };
-const fieldLabel = { fontSize: '0.75rem', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: '0.15rem' };
+const backLinkStyle = {
+  color: 'var(--color-text-tertiary)',
+  fontSize: 'var(--text-sm)',
+  textDecoration: 'none',
+  fontWeight: 500,
+  display: 'inline-block',
+  transition: 'color 0.12s',
+};
+
+const linkBtnStyle = {
+  fontSize: 'var(--text-xs)',
+  color: 'var(--color-brand)',
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  fontWeight: 600,
+};
+
+const sectionTitle = {
+  fontSize: 'var(--text-sm)',
+  fontWeight: 600,
+  color: 'var(--color-text-primary)',
+  letterSpacing: '-0.005em',
+};
+
+const fieldLabel = {
+  fontSize: 'var(--text-xs)',
+  fontWeight: 600,
+  color: 'var(--color-text-tertiary)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  marginBottom: '0.2rem',
+};

@@ -5,10 +5,10 @@ import ChatMessage from '../components/ChatMessage.jsx';
 const STEP_LABELS = [
   'Welcome',
   'Your Name',
-  'Contact',
+  'Contact Info',
   'Area of Need',
   'Urgency',
-  'Your Situation',
+  'Situation',
   'Review',
   'Complete',
 ];
@@ -32,7 +32,6 @@ export default function IntakeChat() {
     }
   }, [messages, loading]);
 
-  // Refocus input after each assistant reply
   useEffect(() => {
     if (started && !isComplete && !loading && inputRef.current) {
       inputRef.current.focus();
@@ -127,175 +126,369 @@ export default function IntakeChat() {
     setStarted(false);
   }
 
-  // ── Pre-start screen ──
+  // ── Landing / Pre-start ──
   if (!started) {
     return (
-      <div className="page">
-        <div className="card" style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
-          <h1 style={{ marginBottom: '0.5rem', fontSize: '1.5rem' }}>Community Intake Assistant</h1>
-          <p style={{ color: '#555', maxWidth: '480px', margin: '0 auto 0.75rem', lineHeight: 1.6 }}>
-            This is an <strong>AI-powered</strong> intake assistant. It will ask a few short questions
-            to understand your needs. <strong>A human case manager will review your information</strong> and follow up with you.
-          </p>
-          <p style={{ color: '#888', fontSize: '0.85rem', maxWidth: '480px', margin: '0 auto 1.25rem' }}>
-            This assistant does not make decisions about eligibility.
-            It only collects information so a real person can help you.
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 'calc(100vh - var(--nav-height))',
+        padding: '2rem 1.5rem',
+        background: 'var(--color-bg)',
+      }}>
+        <div style={{
+          maxWidth: '520px',
+          width: '100%',
+          background: 'var(--color-surface)',
+          borderRadius: 'var(--radius-xl)',
+          border: '1px solid var(--color-border-light)',
+          boxShadow: 'var(--shadow-lg)',
+          padding: '3rem 2.5rem 2.5rem',
+          textAlign: 'center',
+        }}>
+          {/* Brand mark */}
+          <div style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-brand)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem',
+            color: 'white',
+            fontSize: '1.1rem',
+            fontWeight: 800,
+          }}>
+            CI
+          </div>
+
+          <h1 style={{
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 700,
+            color: 'var(--color-text-primary)',
+            marginBottom: '0.6rem',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.2,
+          }}>
+            Community Intake
+          </h1>
+
+          <p style={{
+            color: 'var(--color-text-secondary)',
+            fontSize: 'var(--text-md)',
+            lineHeight: 1.7,
+            marginBottom: '0.4rem',
+          }}>
+            An AI assistant will ask a few short questions to understand your needs. A <strong>human case manager</strong> will review your information and follow up.
           </p>
 
-          <div style={{
-            background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px',
-            padding: '0.75rem 1rem', maxWidth: '420px', margin: '0 auto 1.5rem',
-            fontSize: '0.84rem', color: '#991b1b', lineHeight: 1.5,
+          <p style={{
+            color: 'var(--color-text-tertiary)',
+            fontSize: 'var(--text-sm)',
+            marginBottom: '2rem',
           }}>
-            <strong>If you are in immediate danger, call 911.</strong><br />
-            Suicide &amp; Crisis Lifeline: <strong>988</strong> | Crisis Text Line: Text <strong>HOME</strong> to <strong>741741</strong>
-          </div>
+            This assistant does not make eligibility decisions.
+          </p>
 
           <button
             onClick={handleStart}
             disabled={loading}
+            className="btn-primary"
             style={{
-              padding: '0.7rem 2.5rem', borderRadius: '8px', border: 'none',
-              background: '#1a5632', color: 'white', fontSize: '1rem',
-              cursor: loading ? 'wait' : 'pointer', fontWeight: 600,
+              padding: '0.7rem 2.25rem',
+              fontSize: 'var(--text-md)',
+              borderRadius: 'var(--radius-md)',
+              cursor: loading ? 'wait' : 'pointer',
+              width: '100%',
+              maxWidth: '280px',
             }}
           >
             {loading ? 'Connecting...' : 'Begin Intake'}
           </button>
-          {error && <p style={{ color: '#dc2626', marginTop: '0.75rem', fontSize: '0.9rem' }}>{error}</p>}
+
+          {error && (
+            <p style={{ color: '#dc2626', marginTop: '0.85rem', fontSize: 'var(--text-sm)' }}>{error}</p>
+          )}
+
+          {/* Emergency — muted aside, not alarm-style */}
+          <div style={{
+            marginTop: '2rem',
+            paddingTop: '1.25rem',
+            borderTop: '1px solid var(--color-border-light)',
+            fontSize: 'var(--text-xs)',
+            color: 'var(--color-text-tertiary)',
+            lineHeight: 1.7,
+          }}>
+            <span style={{ color: 'var(--color-crisis-text)', fontWeight: 600 }}>If you are in immediate danger, call 911.</span>
+            <br />
+            Suicide &amp; Crisis Lifeline: <strong style={{ color: 'var(--color-text-secondary)' }}>988</strong>
+            {' '}&middot;{' '}
+            Crisis Text Line: Text <strong style={{ color: 'var(--color-text-secondary)' }}>HOME</strong> to <strong style={{ color: 'var(--color-text-secondary)' }}>741741</strong>
+          </div>
         </div>
       </div>
     );
   }
 
-  // ── Active intake screen ──
-  const progressPct = isComplete ? 100 : ((stepIndex + 1) / STEP_LABELS.length) * 100;
-
+  // ── Active intake workspace ──
   return (
-    <div className="page" style={{ maxWidth: '700px' }}>
-      {/* Progress bar */}
-      <div style={{ marginBottom: '0.75rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#999', marginBottom: '0.25rem' }}>
-          <span style={{ fontWeight: 500 }}>{STEP_LABELS[Math.min(stepIndex, STEP_LABELS.length - 1)]}</span>
-          <span>{Math.min(stepIndex + 1, STEP_LABELS.length)} / {STEP_LABELS.length}</span>
-        </div>
-        <div style={{ background: '#e5e7eb', borderRadius: '4px', height: '5px', overflow: 'hidden' }}>
+    <div style={{ height: `calc(100vh - var(--nav-height))`, overflow: 'hidden' }}>
+      <div className="layout-split" style={{
+        height: '100%',
+        margin: 0,
+        borderRadius: 0,
+        border: 'none',
+        boxShadow: 'none',
+      }}>
+        {/* ── Left Rail ── */}
+        <aside className="sidebar-panel">
+          {/* Session heading */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{
+              fontSize: 'var(--text-xs)',
+              fontWeight: 600,
+              color: 'var(--color-text-tertiary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '0.35rem',
+            }}>
+              Intake Session
+            </div>
+            <div style={{
+              fontSize: 'var(--text-lg)',
+              fontWeight: 700,
+              color: 'var(--color-text-primary)',
+              letterSpacing: '-0.01em',
+            }}>
+              {isComplete ? 'Completed' : `Step ${Math.min(stepIndex + 1, STEP_LABELS.length)} of ${STEP_LABELS.length}`}
+            </div>
+          </div>
+
+          {/* Stepper */}
+          <div className="stepper" style={{ marginBottom: '1.5rem' }}>
+            {STEP_LABELS.map((label, i) => {
+              let state = 'pending';
+              if (isComplete || i < stepIndex) state = 'completed';
+              else if (i === stepIndex) state = 'active';
+
+              return (
+                <div key={label} className={`stepper-item ${state}`}>
+                  <span className="stepper-dot" />
+                  <span>{label}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* AI Disclosure */}
           <div style={{
-            background: isComplete ? '#22c55e' : '#1a5632',
-            height: '100%',
-            width: `${progressPct}%`,
-            transition: 'width 0.4s ease',
-            borderRadius: '4px',
-          }} />
-        </div>
-      </div>
+            padding: '0.85rem 0.9rem',
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-border-light)',
+            borderRadius: 'var(--radius-sm)',
+            marginBottom: '0.75rem',
+          }}>
+            <div style={{
+              fontSize: 'var(--text-xs)',
+              fontWeight: 600,
+              color: 'var(--color-text-tertiary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '0.4rem',
+            }}>
+              About this session
+            </div>
+            <p style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 1.6,
+              margin: 0,
+            }}>
+              You are speaking with an AI assistant. A human case manager will review everything shared here.
+            </p>
+          </div>
 
-      {/* Chat container */}
-      <div className="card" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: '65vh' }}>
-        {/* AI disclosure bar */}
+          {/* Completion block */}
+          {isComplete && (
+            <div style={{
+              padding: '0.85rem 0.9rem',
+              background: 'var(--color-success-bg)',
+              border: '1px solid var(--color-success-border)',
+              borderRadius: 'var(--radius-sm)',
+              marginBottom: '0.75rem',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                marginBottom: '0.5rem',
+                color: 'var(--color-success)',
+                fontWeight: 600,
+                fontSize: 'var(--text-sm)',
+              }}>
+                <span>&#10003;</span> Intake submitted
+              </div>
+
+              {summary ? (
+                <div style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 1.6,
+                }}>
+                  <div style={{
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: 600,
+                    color: 'var(--color-text-tertiary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    marginBottom: '0.3rem',
+                  }}>
+                    Summary for staff
+                  </div>
+                  <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{summary}</p>
+                </div>
+              ) : (
+                <div style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-tertiary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}>
+                  <span className="typing-dots">...</span> Generating summary
+                </div>
+              )}
+
+              <div style={{ marginTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <button onClick={handleNewIntake} className="btn-secondary" style={{ width: '100%' }}>
+                  Start New Intake
+                </button>
+                <Link
+                  to="/dashboard"
+                  className="btn-secondary"
+                  style={{ textDecoration: 'none', textAlign: 'center', width: '100%' }}
+                >
+                  View Dashboard
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Emergency — footer of rail */}
+          <div style={{
+            marginTop: 'auto',
+            paddingTop: '1.25rem',
+            borderTop: '1px solid var(--color-border-light)',
+            fontSize: 'var(--text-xs)',
+            color: 'var(--color-text-tertiary)',
+            lineHeight: 1.7,
+          }}>
+            <span style={{ color: 'var(--color-crisis-text)', fontWeight: 600 }}>Emergency:</span> Call <strong>911</strong>
+            <br />
+            Crisis: <strong>988</strong> &middot; Text <strong>HOME</strong> to <strong>741741</strong>
+          </div>
+        </aside>
+
+        {/* ── Chat Panel ── */}
         <div style={{
-          padding: '0.45rem 0.9rem', background: '#f0f9f4', borderBottom: '1px solid #e5e7eb',
-          fontSize: '0.76rem', color: '#555',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          background: 'var(--color-surface)',
         }}>
-          You are speaking with an <strong>AI assistant</strong>. A human case manager will review your intake.
-        </div>
+          {/* Messages */}
+          <div
+            ref={scrollRef}
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '1.5rem 2rem',
+            }}
+          >
+            {messages.map((msg, i) => (
+              <ChatMessage key={i} role={msg.role} content={msg.content} />
+            ))}
+            {loading && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.4rem 0',
+              }}>
+                <span style={{ color: 'var(--color-brand)' }}>
+                  <span className="typing-dots">...</span>
+                </span>
+                <span style={{ color: 'var(--color-text-tertiary)', fontSize: 'var(--text-sm)' }}>
+                  Thinking
+                </span>
+              </div>
+            )}
 
-        {/* Messages */}
-        <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
-          {messages.map((msg, i) => (
-            <ChatMessage key={i} role={msg.role} content={msg.content} />
-          ))}
-          {loading && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.3rem 0.5rem' }}>
-              <span style={{ color: '#1a5632', fontSize: '0.85rem' }}>
-                <span className="typing-dots">...</span>
-              </span>
-              <span style={{ color: '#999', fontSize: '0.82rem' }}>Assistant is thinking</span>
+            {/* Empty state anchor */}
+            {messages.length === 0 && !loading && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                color: 'var(--color-text-muted)',
+                fontSize: 'var(--text-sm)',
+              }}>
+                Starting conversation...
+              </div>
+            )}
+          </div>
+
+          {/* Composer */}
+          {!isComplete ? (
+            <div className="composer">
+              <div className="composer-inner">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type your response..."
+                  disabled={loading}
+                  autoFocus
+                  className="composer-input"
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={loading || !input.trim()}
+                  className="composer-send"
+                >
+                  Send
+                </button>
+              </div>
+              {error && (
+                <p style={{
+                  color: '#dc2626',
+                  marginTop: '0.5rem',
+                  fontSize: 'var(--text-xs)',
+                  textAlign: 'center',
+                }}>
+                  {error}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div style={{
+              padding: '0.85rem 1.5rem',
+              borderTop: '1px solid var(--color-success-border)',
+              background: 'var(--color-success-bg)',
+              textAlign: 'center',
+              fontSize: 'var(--text-sm)',
+              color: 'var(--color-success)',
+              fontWeight: 500,
+            }}>
+              Intake complete — see sidebar for summary and next steps
             </div>
           )}
         </div>
-
-        {/* Input or completion state */}
-        {!isComplete ? (
-          <div style={{
-            display: 'flex', gap: '0.5rem', padding: '0.65rem 0.75rem',
-            borderTop: '1px solid #e5e7eb', background: '#fafafa',
-          }}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your response..."
-              disabled={loading}
-              autoFocus
-              style={{
-                flex: 1, padding: '0.5rem 0.75rem', borderRadius: '6px',
-                border: '1px solid #d1d5db', fontSize: '0.95rem', outline: 'none',
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={loading || !input.trim()}
-              style={{
-                padding: '0.5rem 1.25rem', borderRadius: '6px', border: 'none',
-                background: '#1a5632', color: 'white', fontWeight: 600,
-                cursor: loading ? 'wait' : 'pointer', opacity: loading || !input.trim() ? 0.5 : 1,
-              }}
-            >
-              Send
-            </button>
-          </div>
-        ) : (
-          <div style={{ padding: '1rem', borderTop: '1px solid #d1fae5', background: '#f0fdf4' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem' }}>
-              <span style={{ color: '#16a34a', fontSize: '1.1rem' }}>&#10003;</span>
-              <span style={{ fontSize: '0.95rem', color: '#15803d', fontWeight: 600 }}>
-                Intake submitted for case manager review
-              </span>
-            </div>
-            {summary ? (
-              <div style={{ fontSize: '0.85rem', color: '#444', background: 'white', padding: '0.6rem 0.75rem', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: '0.3rem' }}>
-                  Summary generated for staff
-                </div>
-                <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{summary}</p>
-              </div>
-            ) : (
-              <div style={{ fontSize: '0.85rem', color: '#888', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span className="typing-dots">...</span> Generating summary for case manager
-              </div>
-            )}
-            <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <button
-                onClick={handleNewIntake}
-                style={{
-                  padding: '0.4rem 1rem', borderRadius: '6px', border: '1px solid #d1d5db',
-                  background: 'white', color: '#374151', fontSize: '0.85rem', cursor: 'pointer',
-                }}
-              >
-                Start New Intake
-              </button>
-              <Link
-                to="/dashboard"
-                style={{
-                  padding: '0.4rem 1rem', borderRadius: '6px', border: '1px solid #d1d5db',
-                  background: 'white', color: '#1a5632', fontSize: '0.85rem', textDecoration: 'none',
-                }}
-              >
-                View Dashboard
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {error && <p style={{ color: '#dc2626', marginTop: '0.5rem', fontSize: '0.9rem' }}>{error}</p>}
-
-      {/* Emergency footer */}
-      <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#aaa', textAlign: 'center' }}>
-        If you are in immediate danger, call <strong>911</strong>. Suicide &amp; Crisis Lifeline: <strong>988</strong>
       </div>
     </div>
   );

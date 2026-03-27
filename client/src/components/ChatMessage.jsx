@@ -5,24 +5,22 @@ export default function ChatMessage({ role, content }) {
     <div style={{
       display: 'flex',
       justifyContent: isAssistant ? 'flex-start' : 'flex-end',
-      marginBottom: '0.65rem',
+      marginBottom: '0.85rem',
     }}>
       <div style={{
-        maxWidth: '80%',
-        padding: '0.55rem 0.85rem',
-        borderRadius: isAssistant ? '12px 12px 12px 3px' : '12px 12px 3px 12px',
-        background: isAssistant ? '#f0f4f0' : '#1a5632',
-        color: isAssistant ? '#1a1a1a' : 'white',
-        fontSize: '0.93rem',
-        lineHeight: '1.55',
+        maxWidth: '70%',
+        padding: '0.7rem 1rem',
+        borderRadius: isAssistant
+          ? '2px var(--radius-lg) var(--radius-lg) var(--radius-lg)'
+          : 'var(--radius-lg) 2px var(--radius-lg) var(--radius-lg)',
+        background: isAssistant ? 'var(--color-surface-raised)' : 'var(--color-brand)',
+        color: isAssistant ? 'var(--color-text-primary)' : 'white',
+        fontSize: 'var(--text-md)',
+        lineHeight: '1.65',
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
+        border: isAssistant ? '1px solid var(--color-border-light)' : 'none',
       }}>
-        {isAssistant && (
-          <div style={{ fontSize: '0.68rem', color: '#999', marginBottom: '0.15rem', fontWeight: 600, letterSpacing: '0.02em' }}>
-            AI ASSISTANT
-          </div>
-        )}
         {content}
       </div>
     </div>

@@ -1,26 +1,29 @@
 const STATUS_STYLES = {
-  new:        { bg: '#dbeafe', color: '#1e40af', label: 'New' },
-  in_progress:{ bg: '#fef9c3', color: '#854d0e', label: 'In Progress' },
-  submitted:  { bg: '#e0e7ff', color: '#3730a3', label: 'Submitted' },
-  in_review:  { bg: '#fef3c7', color: '#92400e', label: 'In Review' },
-  follow_up:  { bg: '#fce7f3', color: '#9d174d', label: 'Follow Up' },
-  referred:   { bg: '#d1fae5', color: '#065f46', label: 'Referred' },
-  closed:     { bg: '#f3f4f6', color: '#6b7280', label: 'Closed' },
+  new:        { bg: '#eff6ff', color: '#1d4ed8', label: 'New' },
+  in_progress:{ bg: '#fefce8', color: '#a16207', label: 'In Progress' },
+  submitted:  { bg: '#eef2ff', color: '#4338ca', label: 'Submitted' },
+  in_review:  { bg: '#fff7ed', color: '#c2410c', label: 'In Review' },
+  follow_up:  { bg: '#fdf2f8', color: '#be185d', label: 'Follow Up' },
+  referred:   { bg: '#ecfdf5', color: '#059669', label: 'Referred' },
+  closed:     { bg: '#f8fafc', color: '#64748b', label: 'Closed' },
 };
 
 const URGENCY_STYLES = {
-  low:    { bg: '#f3f4f6', color: '#6b7280', label: 'Low' },
-  medium: { bg: '#fef3c7', color: '#92400e', label: 'Medium' },
-  high:   { bg: '#fee2e2', color: '#991b1b', label: 'High' },
+  low:    { bg: '#f8fafc', color: '#64748b', label: 'Low' },
+  medium: { bg: '#fff7ed', color: '#c2410c', label: 'Medium' },
+  high:   { bg: '#fef2f2', color: '#dc2626', label: 'High' },
 };
 
 const badgeBase = {
-  display: 'inline-block',
-  padding: '0.15rem 0.55rem',
-  borderRadius: '9999px',
-  fontSize: '0.75rem',
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '0.2rem 0.55rem',
+  borderRadius: 'var(--radius-full)',
+  fontSize: '0.7rem',
   fontWeight: 600,
-  letterSpacing: '0.01em',
+  letterSpacing: '0.02em',
+  lineHeight: 1,
+  whiteSpace: 'nowrap',
 };
 
 export function StatusBadge({ status }) {
@@ -37,10 +40,21 @@ export function UrgencyBadge({ level, crisisFlag }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
       <span style={{ ...badgeBase, background: s.bg, color: s.color }}>
+        {level === 'high' && (
+          <span style={{ marginRight: '0.25rem', fontSize: '0.6rem' }}>&#9679;</span>
+        )}
         {s.label}
       </span>
       {crisisFlag && (
-        <span style={{ ...badgeBase, background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5' }}>
+        <span style={{
+          ...badgeBase,
+          background: '#fef2f2',
+          color: '#dc2626',
+          border: '1px solid #fecaca',
+          fontWeight: 700,
+          letterSpacing: '0.05em',
+        }}>
+          <span style={{ marginRight: '0.2rem', fontSize: '0.55rem' }}>&#9679;</span>
           CRISIS
         </span>
       )}
