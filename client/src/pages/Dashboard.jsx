@@ -41,12 +41,15 @@ export default function Dashboard() {
     return true;
   });
 
+  const urgentCount = intakes.filter((i) => i.urgencyFlag === 'high' && i.status !== 'closed').length;
+
   return (
     <div className="page" style={{ maxWidth: '960px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.75rem' }}>
         <h1 style={{ fontSize: '1.4rem' }}>Staff Dashboard</h1>
         <span style={{ color: '#888', fontSize: '0.85rem' }}>
-          {intakes.length} intake{intakes.length !== 1 ? 's' : ''} total
+          {intakes.length} intake{intakes.length !== 1 ? 's' : ''}
+          {urgentCount > 0 && <span style={{ color: '#dc2626', fontWeight: 600 }}> &middot; {urgentCount} urgent</span>}
         </span>
       </div>
 
@@ -60,7 +63,7 @@ export default function Dashboard() {
         >
           <option value="all">All statuses</option>
           {STATUSES.map((s) => (
-            <option key={s} value={s}>{s.replace('_', ' ')}</option>
+            <option key={s} value={s}>{s.replaceAll('_', ' ')}</option>
           ))}
         </select>
         <select

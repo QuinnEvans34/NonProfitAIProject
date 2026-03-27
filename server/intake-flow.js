@@ -14,18 +14,17 @@ const NEED_CATEGORIES = ['Housing', 'Food', 'Healthcare', 'Employment', 'Legal',
 const STEPS = {
   greeting: {
     prompt: () =>
-      'Introduce yourself as an AI intake assistant for a community services organization. ' +
-      'Say clearly that you are an AI, not a human. Say that a human case manager will review ' +
-      'everything shared here. Ask if they are ready to get started. Keep it to 2-3 sentences.',
-    extract: () => ({}), // nothing to capture
+      'Greet the client in 2 sentences. Say you are an AI intake assistant (not a human). ' +
+      'Say a human case manager will review their information. Then ask if they are ready to start.',
+    extract: () => ({}),
     next: () => 'ask_name',
   },
 
   ask_name: {
-    prompt: () => 'Ask the client for their first name (last name optional). Keep it brief.',
+    prompt: () =>
+      'In one sentence, ask for their first name so you know what to call them.',
     extract: (text) => {
-      // Take the first 1-3 words that look like a name (capitalized or not)
-      const cleaned = text.replace(/^(my name is|i['']?m|call me|it['']?s)\s*/i, '').trim();
+      const cleaned = text.replace(/^(my name is|i['']?m|call me|it['']?s|hi i['']?m|hey i['']?m)\s*/i, '').trim();
       const name = cleaned.split(/[\s,]+/).slice(0, 3).join(' ');
       return name.length > 0 ? { clientName: name } : null;
     },
@@ -34,15 +33,14 @@ const STEPS = {
 
   ask_contact: {
     prompt: (intake) =>
-      `Thank ${intake.clientName || 'them'} and ask how they would prefer to be contacted ` +
-      'for follow-up — phone, email, text, or in person. One short sentence.',
+      `Say "Thanks, ${intake.clientName || ''}." then ask in one sentence how they prefer to be contacted ` +
+      'for follow-up: phone, email, text, or in person.',
     extract: (text) => {
       const lower = text.toLowerCase();
       if (/phone|call/i.test(lower)) return { contactPreference: 'phone' };
       if (/email/i.test(lower)) return { contactPreference: 'email' };
       if (/text|sms/i.test(lower)) return { contactPreference: 'text' };
       if (/in\s*person|walk.?in|office/i.test(lower)) return { contactPreference: 'in-person' };
-      // Accept whatever they said
       return { contactPreference: text.trim().slice(0, 50) };
     },
     next: () => 'ask_category',
@@ -50,15 +48,13 @@ const STEPS = {
 
   ask_category: {
     prompt: () =>
-      'Ask what general area they need help with. Offer these options naturally in a sentence: ' +
-      'housing, food, healthcare, employment, legal help, utilities, or something else. ' +
-      'Ask them to pick the one that fits best.',
+      'In 1-2 sentences, ask which area they need help with. List these options naturally: ' +
+      'housing, food, healthcare, employment, legal help, utilities, or something else.',
     extract: (text) => {
       const lower = text.toLowerCase();
       for (const cat of NEED_CATEGORIES) {
         if (lower.includes(cat.toLowerCase())) return { needCategory: cat };
       }
-      // Check common synonyms
       if (/rent|apartment|shelter|homeless|evict/i.test(lower)) return { needCategory: 'Housing' };
       if (/hungry|meal|grocery|snap|ebt/i.test(lower)) return { needCategory: 'Food' };
       if (/doctor|medical|health|insurance|prescription|medicaid/i.test(lower)) return { needCategory: 'Healthcare' };
@@ -72,10 +68,9 @@ const STEPS = {
 
   ask_urgency: {
     prompt: (intake) =>
-      `Ask whether their ${intake.needCategory?.toLowerCase() || ''} situation is happening right now or ` +
-      'is urgent, or whether they are planning ahead. Keep it to one clear question.',
+      `In one sentence, ask if their ${intake.needCategory?.toLowerCase() || ''} need is urgent or ` +
+      'time-sensitive right now, or if they are planning ahead.',
     extract: (text) => {
-      // Rule-based urgency from this specific answer
       const assessment = assessMessage(text);
       return { _urgencyFromAnswer: assessment };
     },
@@ -84,8 +79,9 @@ const STEPS = {
 
   ask_situation: {
     prompt: (intake) =>
-      `Ask ${intake.clientName || 'them'} to describe their situation in a few sentences — ` +
-      'whatever they are comfortable sharing. Say this helps the case manager understand how to help.',
+      `In 1-2 sentences, ask ${intake.clientName || 'them'} to briefly describe their situation ` +
+      'in their own words — whatever they are comfortable sharing. ' +
+      'Say this helps the case manager understand how best to help.',
     extract: (text) => {
       return text.trim().length > 0 ? { situationSummary: text.trim() } : null;
     },
@@ -93,38 +89,31 @@ const STEPS = {
   },
 
   confirm: {
-    prompt: (intake) => {
-      const lines = [
-        `Read back what you have collected and ask ${intake.clientName || 'them'} to confirm it looks right, or to correct anything:`,
-        `- Name: ${intake.clientName || '(not provided)'}`,
-        `- Contact preference: ${intake.contactPreference || '(not provided)'}`,
-        `- Area of need: ${intake.needCategory || '(not provided)'}`,
-        `- Urgency: ${intake.urgencyFlag || 'not yet assessed'}`,
-        `- Situation: ${intake.structuredAnswers?.situationSummary || '(not provided)'}`,
-        'Ask them to say "yes" if correct or tell you what to change. Keep it concise.',
-      ];
-      return lines.join('\n');
-    },
+    prompt: (intake) =>
+      `Briefly read back what you collected and ask ${intake.clientName || 'them'} to confirm or correct it:\n` +
+      `Name: ${intake.clientName || '(not provided)'}\n` +
+      `Contact: ${intake.contactPreference || '(not provided)'}\n` +
+      `Need: ${intake.needCategory || '(not provided)'}\n` +
+      `Situation: ${intake.structuredAnswers?.situationSummary || '(not provided)'}\n` +
+      'Keep the readback concise. End with: "Does this look right, or would you like to change anything?"',
     extract: (text) => {
-      const lower = text.toLowerCase();
-      const confirmed = /^(yes|yeah|yep|correct|looks?\s*(good|right|correct)|that['']?s\s*(right|correct)|confirm)/i.test(lower);
+      const lower = text.toLowerCase().trim();
+      const confirmed = /^(yes|yeah|yep|yup|correct|right|looks?\s*(good|right|correct)|that['']?s\s*(right|correct)|confirm|good|perfect|ok|okay)/i.test(lower);
       return { _confirmed: confirmed };
     },
-    next: (intake, extracted) => {
+    next: (_intake, extracted) => {
       if (extracted._confirmed) return 'complete';
-      // If not confirmed, cycle back to ask_name to let them re-do
-      // In practice for the demo, most people will just say yes
       return 'ask_name';
     },
   },
 
   complete: {
     prompt: (intake) =>
-      `Thank ${intake.clientName || 'them'} for sharing this information. Let them know that a human ` +
-      'case manager will review their intake and follow up using their preferred contact method. ' +
-      'Remind them that if they are in immediate danger, they should call 911. Keep it warm and brief.',
+      `In 2 sentences, thank ${intake.clientName || 'them'} and let them know a case manager ` +
+      `will review their information and reach out via ${intake.contactPreference || 'their preferred method'}. ` +
+      'Keep it warm and reassuring. Do not add anything else.',
     extract: () => ({}),
-    next: () => null, // terminal
+    next: () => null,
   },
 };
 
@@ -256,6 +245,9 @@ async function generateIntakeSummary(intakeId) {
   const intake = store.getById(intakeId);
   if (!intake) return;
 
+  console.log(`Generating summary for intake ${intakeId}...`);
+  const start = Date.now();
+
   const prompt = buildSummaryPrompt(intake.transcript, {
     ...intake.structuredAnswers,
     clientName: intake.clientName,
@@ -267,6 +259,7 @@ async function generateIntakeSummary(intakeId) {
 
   const summary = await generateSummary(prompt);
   store.update(intakeId, { summary });
+  console.log(`Summary saved for ${intakeId} in ${((Date.now() - start) / 1000).toFixed(1)}s (${summary.length} chars)`);
 }
 
 export { STEP_ORDER, NEED_CATEGORIES };
