@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as store from '../store.js';
-import { startIntake, processMessage } from '../intake-flow.js';
+import { startIntake, processMessage, runAnalyzer } from '../intake-flow.js';
 
 const router = Router();
 
@@ -48,6 +48,22 @@ router.get('/:id', (req, res) => {
   const intake = store.getById(req.params.id);
   if (!intake) return res.status(404).json({ error: 'Intake not found' });
   res.json(intake);
+});
+
+// POST /api/intakes/:id/reanalyze — staff-triggered re-run of the analyzer
+router.post('/:id/reanalyze', async (req, res) => {
+  const intake = store.getById(req.params.id);
+  if (!intake) return res.status(404).json({ error: 'Intake not found' });
+  if (intake.currentStep !== 'complete') {
+    return res.status(400).json({ error: 'Intake is not complete' });
+  }
+  try {
+    await runAnalyzer(req.params.id);
+    res.json(store.getById(req.params.id));
+  } catch (err) {
+    console.error('reanalyze error:', err);
+    res.status(500).json({ error: 'Failed to re-analyze' });
+  }
 });
 
 // PATCH /api/intakes/:id — update allowed fields

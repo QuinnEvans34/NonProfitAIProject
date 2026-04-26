@@ -1,0 +1,25 @@
+{
+  "id": "01-routine-food",
+  "description": "Maria-style case: stable client planning ahead, looking for routine food pantry assistance.",
+  "input": {
+    "qaPairs": [
+      { "question": "What is your first name?", "answer": "Maria" },
+      { "question": "How would you like us to reach you?", "answer": "phone call" },
+      { "question": "What kind of help do you need?", "answer": "food pantry information for next month" },
+      { "question": "Is this urgent?", "answer": "no, just planning ahead for groceries" },
+      { "question": "Tell me about your situation.", "answer": "Things are stable but money is tight. Looking into the local food pantry to stretch the budget for next month's groceries." }
+    ],
+    "ruleSignals": {
+      "urgencyFlag": "low",
+      "crisisFlag": false,
+      "triggers": []
+    }
+  },
+  "expect": {
+    "severity": { "atLeast": "low" },
+    "primaryCategory": "Food",
+    "urgencyWindow": { "in": ["planning", "this_month"] },
+    "followUpQuestionsAtLeast": 2,
+    "languageDetected": "en"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "06-ambiguous-multi-category",
+  "description": "Client need spans housing, food, and healthcare. Analyzer should pick a primary and surface at least two secondary categories.",
+  "input": {
+    "qaPairs": [
+      { "question": "What is your first name?", "answer": "Sam" },
+      { "question": "How would you like us to reach you?", "answer": "email" },
+      { "question": "What kind of help do you need?", "answer": "I'm behind on rent, can't afford groceries, and I'm out of my diabetes medication" },
+      { "question": "Is this urgent?", "answer": "I think so, all of it is piling up at the same time" },
+      { "question": "Tell me about your situation.", "answer": "Lost hours at work two months back. Behind on rent, fridge is mostly empty, and I ran out of my insulin last week and can't afford the refill. Trying to figure out where to start." }
+    ],
+    "ruleSignals": {
+      "urgencyFlag": "medium",
+      "crisisFlag": false,
+      "triggers": ["medium: \"behind on rent\""]
+    }
+  },
+  "expect": {
+    "severity": { "atLeast": "medium" },
+    "secondaryIncludes": ["Food", "Healthcare"],
+    "followUpQuestionsAtLeast": 2,
+    "languageDetected": "en"
+  }
+}

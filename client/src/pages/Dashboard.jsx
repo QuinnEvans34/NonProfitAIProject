@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StatusBadge, UrgencyBadge, STATUSES } from '../components/StatusBadge.jsx';
+import { StatusBadge, STATUSES } from '../components/StatusBadge.jsx';
+import EmptyState from '../components/EmptyState.jsx';
+import SeverityPill from '../components/SeverityPill.jsx';
+import ScoreRing from '../components/ScoreRing.jsx';
+import {
+  RefreshCw,
+  ClipboardList,
+  ShieldAlert,
+  Filter,
+  AlertTriangle,
+  Sparkles,
+  CATEGORY_ICON,
+} from '../lib/icons.js';
 
 function timeAgo(iso) {
   if (!iso) return '';
@@ -19,11 +31,16 @@ const URGENCY_BORDER = {
   low: 'transparent',
 };
 
+const SpinningRefresh = (props) => (
+  <RefreshCw {...props} style={{ animation: 'dashboard-spin 1s linear infinite' }} />
+);
+
 export default function Dashboard() {
   const [intakes, setIntakes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [urgencyFilter, setUrgencyFilter] = useState('all');
+  const [lastRefreshed, setLastRefreshed] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,13 +54,15 @@ export default function Dashboard() {
       const res = await fetch('/api/intakes');
       const data = await res.json();
       setIntakes(data);
+      setLastRefreshed(new Date());
     } catch { /* silent */ }
     setLoading(false);
   }
 
   const filtered = intakes.filter((i) => {
     if (statusFilter !== 'all' && i.status !== statusFilter) return false;
-    if (urgencyFilter !== 'all' && i.urgencyFlag !== urgencyFilter) return false;
+    const effectiveLevel = i.analysis?.severity?.level || i.urgencyFlag;
+    if (urgencyFilter !== 'all' && effectiveLevel !== urgencyFilter) return false;
     return true;
   });
 
@@ -62,6 +81,7 @@ export default function Dashboard() {
 
   return (
     <div className="page">
+      <style>{`@keyframes dashboard-spin { to { transform: rotate(360deg); } }`}</style>
       <div className="layout-dashboard">
         {/* Header bar */}
         <div style={{
@@ -89,6 +109,9 @@ export default function Dashboard() {
             </span>
             {urgentCount > 0 && (
               <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
                 fontSize: 'var(--text-xs)',
                 fontWeight: 700,
                 color: 'var(--color-crisis-text)',
@@ -97,6 +120,7 @@ export default function Dashboard() {
                 borderRadius: 'var(--radius-full)',
                 border: '1px solid var(--color-crisis-border)',
               }}>
+                <AlertTriangle size={12} aria-hidden />
                 {urgentCount} urgent
               </span>
             )}
@@ -104,6 +128,7 @@ export default function Dashboard() {
 
           {/* Inline filters */}
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <Filter size={14} aria-hidden style={{ color: 'var(--color-text-tertiary)' }} />
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={selectStyle}>
               <option value="all">All statuses</option>
               {STATUSES.map((s) => (
@@ -111,7 +136,7 @@ export default function Dashboard() {
               ))}
             </select>
             <select value={urgencyFilter} onChange={(e) => setUrgencyFilter(e.target.value)} style={selectStyle}>
-              <option value="all">All urgency</option>
+              <option value="all">All severity</option>
               <option value="high">High</option>
               <option value="medium">Medium</option>
               <option value="low">Low</option>
@@ -138,22 +163,29 @@ export default function Dashboard() {
         {/* Table */}
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           {loading ? (
-            <div style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: 'var(--text-sm)' }}>
-              Loading...
-            </div>
+            <EmptyState icon={SpinningRefresh} title="Loading intakes..." />
           ) : filtered.length === 0 ? (
-            <div style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--color-text-tertiary)', fontSize: 'var(--text-sm)' }}>
-              {intakes.length === 0
-                ? 'No intakes yet. Complete an intake to see it here.'
-                : 'No intakes match the current filters.'}
-            </div>
+            intakes.length === 0 ? (
+              <EmptyState
+                icon={ClipboardList}
+                title="No intakes yet"
+                body="Complete an intake to see it here."
+              />
+            ) : (
+              <EmptyState
+                icon={ClipboardList}
+                title="No matches"
+                body="No intakes match the current filters."
+              />
+            )
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--color-border-light)' }}>
                   <th style={th}>Client</th>
                   <th style={th}>Category</th>
-                  <th style={th}>Urgency</th>
+                  <th style={th}>Severity</th>
+                  <th style={th}>Score</th>
                   <th style={th}>Status</th>
                   <th style={{ ...th, textAlign: 'right' }}>Updated</th>
                 </tr>
@@ -168,6 +200,11 @@ export default function Dashboard() {
                     : intake.urgencyFlag === 'high'
                       ? 'var(--color-urgent-bg)'
                       : 'var(--color-surface)';
+                  const severityLevel = intake.analysis?.severity?.level || intake.urgencyFlag || 'low';
+                  const isLegacy = !intake.analysis;
+                  const CategoryIcon = intake.needCategory
+                    ? (CATEGORY_ICON[intake.needCategory] || Sparkles)
+                    : null;
 
                   return (
                     <tr
@@ -181,15 +218,54 @@ export default function Dashboard() {
                       }}
                     >
                       <td style={td}>
-                        <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>
-                          {intake.clientName || '(unnamed)'}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                          {intake.crisisFlag && (
+                            <ShieldAlert
+                              size={14}
+                              aria-hidden
+                              style={{ color: 'var(--color-crisis-text)' }}
+                            />
+                          )}
+                          <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>
+                            {intake.clientName || '(unnamed)'}
+                          </span>
                         </span>
                       </td>
                       <td style={{ ...td, color: 'var(--color-text-secondary)' }}>
-                        {intake.needCategory || '\u2014'}
+                        {intake.needCategory ? (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <CategoryIcon
+                              size={14}
+                              aria-hidden
+                              style={{ color: 'var(--color-text-tertiary)' }}
+                            />
+                            {intake.needCategory}
+                          </span>
+                        ) : '—'}
                       </td>
                       <td style={td}>
-                        <UrgencyBadge level={intake.urgencyFlag} crisisFlag={intake.crisisFlag} />
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <SeverityPill level={severityLevel} />
+                          {isLegacy && (
+                            <span style={{
+                              fontSize: 'var(--text-xs)',
+                              color: 'var(--color-text-tertiary)',
+                            }}>
+                              (legacy)
+                            </span>
+                          )}
+                        </span>
+                      </td>
+                      <td style={td}>
+                        {intake.helpScore != null ? (
+                          <ScoreRing
+                            score={intake.helpScore}
+                            size={28}
+                            severity={severityLevel}
+                          />
+                        ) : (
+                          <span style={{ color: 'var(--color-text-tertiary)' }}>&mdash;</span>
+                        )}
                       </td>
                       <td style={td}>
                         <StatusBadge status={intake.status} />
@@ -204,6 +280,20 @@ export default function Dashboard() {
             </table>
           )}
         </div>
+
+        {intakes.length > 0 && (
+          <div style={{
+            marginTop: '0.85rem',
+            textAlign: 'center',
+            fontSize: 'var(--text-xs)',
+            color: 'var(--color-text-tertiary)',
+          }}>
+            Updated automatically every 10 seconds
+            {lastRefreshed && (
+              <> &middot; Last refreshed {lastRefreshed.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,26 @@
+{
+  "id": "08-medical-emergency",
+  "description": "Active medical emergency disclosed. Severity must be at least high; medical_emergency risk flag must be true.",
+  "input": {
+    "qaPairs": [
+      { "question": "What is your first name?", "answer": "Robin" },
+      { "question": "How would you like us to reach you?", "answer": "phone, anytime" },
+      { "question": "What kind of help do you need?", "answer": "I think I'm having a medical emergency, chest pain since this morning" },
+      { "question": "Is this urgent?", "answer": "yes" },
+      { "question": "Tell me about your situation.", "answer": "Sharp chest pain since early today, no insurance, can't afford the ER copay. Live alone and don't know what to do." }
+    ],
+    "ruleSignals": {
+      "urgencyFlag": "high",
+      "crisisFlag": false,
+      "triggers": ["high: \"medical emergency\"", "medium: \"no insurance\""]
+    }
+  },
+  "expect": {
+    "severity": { "atLeast": "high" },
+    "primaryCategory": "Healthcare",
+    "riskFlagsTrue": ["medical_emergency"],
+    "urgencyWindow": { "in": ["today", "this_week"] },
+    "followUpQuestionsAtLeast": 2,
+    "languageDetected": "en"
+  }
+}
