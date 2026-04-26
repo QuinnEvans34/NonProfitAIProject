@@ -1,10 +1,13 @@
 // App-controlled intake flow state machine.
 // The model generates conversational text; the app decides step transitions and data capture.
 
-import { chatReply, generateSummary } from './ollama.js';
-import { INTAKE_SYSTEM_PROMPT, buildSummaryPrompt } from './prompts.js';
+import { chatReply } from './ollama.js';
+import { INTAKE_SYSTEM_PROMPT } from './prompts.js';
 import { assessMessage, assessTranscript } from './urgency.js';
 import * as store from './store.js';
+import { buildQAPairs } from './store.js';
+import { analyzeIntake } from './llm/analyzer.js';
+import { computeHelpScore } from './help-score.js';
 
 // ── Step definitions ──
 // Each step: { id, prompt (instruction for model), extract (pull data from user reply), next (decide next step) }
@@ -209,9 +212,8 @@ export async function processMessage(intakeId, userMessage) {
   if (isComplete) {
     intake.status = 'submitted';
 
-    // Generate summary asynchronously — don't block the response
-    generateIntakeSummary(intake.id).catch((err) =>
-      console.error('Summary generation failed for', intake.id, err.message)
+    runAnalyzer(intake.id).catch((err) =>
+      console.error('Analyzer failed for', intake.id, err.message)
     );
   }
 
@@ -240,26 +242,45 @@ export async function processMessage(intakeId, userMessage) {
   };
 }
 
-// Generate and save the intake summary.
-async function generateIntakeSummary(intakeId) {
+export async function runAnalyzer(intakeId) {
   const intake = store.getById(intakeId);
   if (!intake) return;
 
-  console.log(`Generating summary for intake ${intakeId}...`);
+  console.log(`Running analyzer for intake ${intakeId}...`);
   const start = Date.now();
 
-  const prompt = buildSummaryPrompt(intake.transcript, {
-    ...intake.structuredAnswers,
-    clientName: intake.clientName,
-    contactPreference: intake.contactPreference,
-    needCategory: intake.needCategory,
-    urgencyFlag: intake.urgencyFlag,
-    crisisFlag: intake.crisisFlag ? 'Yes' : 'No',
-  });
+  try {
+    const qaPairs = buildQAPairs(intake);
+    const ruleSignals = assessTranscript(intake.transcript);
+    const analysis = await analyzeIntake(qaPairs, ruleSignals);
+    const { score: helpScore } = computeHelpScore(analysis);
 
-  const summary = await generateSummary(prompt);
-  store.update(intakeId, { summary });
-  console.log(`Summary saved for ${intakeId} in ${((Date.now() - start) / 1000).toFixed(1)}s (${summary.length} chars)`);
+    const severityToUrgency = { crisis: 'high', high: 'high', medium: 'medium', low: 'low' };
+    const urgencyFlag = severityToUrgency[analysis.severity.level] || 'low';
+    const crisisFlag = analysis.severity.level === 'crisis' || ruleSignals.crisisFlag;
+
+    const patch = {
+      qaPairs,
+      analysis,
+      helpScore,
+      summary: analysis.summary.staff_facing,
+      urgencyFlag,
+      crisisFlag,
+    };
+
+    if (!intake.needCategory || intake.needCategory === 'Other') {
+      patch.needCategory = analysis.classification.primary_category;
+    }
+
+    store.update(intakeId, patch);
+    console.log(`Analyzer saved for ${intakeId} in ${((Date.now() - start) / 1000).toFixed(1)}s (helpScore=${helpScore}, severity=${analysis.severity.level})`);
+  } catch (err) {
+    console.error(`Analyzer failed for ${intakeId}:`, err.message);
+    store.update(intakeId, {
+      qaPairs: buildQAPairs(intake),
+      summary: 'AI analysis unavailable. Please review the transcript and case information directly.',
+    });
+  }
 }
 
 export { STEP_ORDER, NEED_CATEGORIES };

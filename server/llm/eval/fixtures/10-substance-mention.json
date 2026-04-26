@@ -1,0 +1,24 @@
+{
+  "id": "10-substance-mention",
+  "description": "Client mentions substance use in passing while asking about housing help. substance_abuse flag must fire but severity must NOT auto-escalate to crisis.",
+  "input": {
+    "qaPairs": [
+      { "question": "What is your first name?", "answer": "Chris" },
+      { "question": "How would you like us to reach you?", "answer": "phone" },
+      { "question": "What kind of help do you need?", "answer": "help finding stable housing" },
+      { "question": "Is this urgent?", "answer": "soon-ish, current place is month-to-month" },
+      { "question": "Tell me about your situation.", "answer": "Working part-time, looking for a more stable apartment. Honestly I've been drinking too much lately to cope with the stress, but I'm looking into a support group on my own." }
+    ],
+    "ruleSignals": {
+      "urgencyFlag": "low",
+      "crisisFlag": false,
+      "triggers": []
+    }
+  },
+  "expect": {
+    "riskFlagsTrue": ["substance_abuse"],
+    "urgencyWindow": { "in": ["this_week", "this_month", "planning"] },
+    "followUpQuestionsAtLeast": 2,
+    "languageDetected": "en"
+  }
+}

@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import intakeRoutes from './routes/intake.js';
 import chatRoutes from './routes/chat.js';
+import adminRoutes from './routes/admin.js';
+import reportsRoutes from './routes/reports.js';
 import { seedIfEmpty } from './seed.js';
 import { warmUpModel } from './ollama.js';
 
@@ -18,6 +20,8 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/intakes', intakeRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // Seed demo data if store is empty (dev convenience)
 seedIfEmpty();

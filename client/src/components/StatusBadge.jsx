@@ -63,3 +63,5 @@ export function UrgencyBadge({ level, crisisFlag }) {
 }
 
 export const STATUSES = ['new', 'submitted', 'in_review', 'follow_up', 'referred', 'closed'];
+
+export { default as SeverityBadge } from './SeverityPill.jsx';

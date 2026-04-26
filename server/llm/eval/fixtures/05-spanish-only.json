@@ -1,0 +1,23 @@
+{
+  "id": "05-spanish-only",
+  "description": "Spanish-only intake. Analyzer must detect language as 'es' and still classify the need.",
+  "input": {
+    "qaPairs": [
+      { "question": "¿Cuál es su primer nombre?", "answer": "Lucía" },
+      { "question": "¿Cómo prefiere que le contactemos?", "answer": "llamada telefónica" },
+      { "question": "¿Qué tipo de ayuda necesita?", "answer": "necesito ayuda con comida para mi familia" },
+      { "question": "¿Es urgente?", "answer": "es importante pero no de emergencia" },
+      { "question": "Cuénteme sobre su situación.", "answer": "Tengo tres hijos pequeños y la despensa de comida local cerró el mes pasado. Necesito información sobre otra despensa cercana." }
+    ],
+    "ruleSignals": {
+      "urgencyFlag": "low",
+      "crisisFlag": false,
+      "triggers": []
+    }
+  },
+  "expect": {
+    "primaryCategory": "Food",
+    "followUpQuestionsAtLeast": 2,
+    "languageDetected": "es"
+  }
+}

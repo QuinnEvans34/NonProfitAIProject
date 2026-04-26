@@ -1,0 +1,24 @@
+{
+  "id": "09-stable-planning-ahead",
+  "description": "Stable client planning months ahead for utility assistance. No risk flags should fire; urgency_window should be 'planning'.",
+  "input": {
+    "qaPairs": [
+      { "question": "What is your first name?", "answer": "Jordan" },
+      { "question": "How would you like us to reach you?", "answer": "email, no rush" },
+      { "question": "What kind of help do you need?", "answer": "information about LIHEAP for the winter heating season" },
+      { "question": "Is this urgent?", "answer": "no, planning ahead for the winter" },
+      { "question": "Tell me about your situation.", "answer": "Stable income, fixed monthly budget. Looking ahead to winter heating costs and want to know if I would qualify for LIHEAP if my hours get cut later in the year." }
+    ],
+    "ruleSignals": {
+      "urgencyFlag": "low",
+      "crisisFlag": false,
+      "triggers": []
+    }
+  },
+  "expect": {
+    "severity": { "atLeast": "low" },
+    "urgencyWindow": { "in": ["planning"] },
+    "followUpQuestionsAtLeast": 2,
+    "languageDetected": "en"
+  }
+}

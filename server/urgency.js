@@ -1,13 +1,13 @@
 // Rule-based urgency and crisis detection.
 // The app owns these flags — the model does NOT decide urgency.
 
-const CRISIS_PATTERNS = [
+export const CRISIS_PATTERNS = [
   /\b(suicid|kill\s*(my|him|her|them)?self|end\s*(my|their)\s*life|want\s*to\s*die)\b/i,
   /\b(abuse|abus(ed|ing)|domestic\s*violence|being\s*hit|hitting\s*me)\b/i,
   /\b(overdos|od['']?ing)\b/i,
 ];
 
-const HIGH_URGENCY_PATTERNS = [
+export const HIGH_URGENCY_PATTERNS = [
   /\b(no\s*(safe\s*)?place\s*to\s*(stay|sleep|go)|sleep(ing)?\s*(outside|rough|in\s*(my\s*)?car))\b/i,
   /\b(homeless|unhoused|evict(ed|ion)\s*(today|tonight|tomorrow|this\s*week))\b/i,
   /\b(no\s*food|haven['']?t\s*eaten|kids?\s*(are\s*)?(hungry|haven['']?t\s*eaten))\b/i,
@@ -17,7 +17,7 @@ const HIGH_URGENCY_PATTERNS = [
   /\b(danger|threatened|unsafe|afraid\s*for\s*(my|our)\s*(life|safety))\b/i,
 ];
 
-const MEDIUM_URGENCY_PATTERNS = [
+export const MEDIUM_URGENCY_PATTERNS = [
   /\b(behind\s*on\s*rent|facing\s*eviction|eviction\s*notice)\b/i,
   /\b(lost\s*(my\s*)?(job|work|income|housing|apartment|home))\b/i,
   /\b(can['']?t\s*(afford|pay)\s*(rent|bills|utilities|medication))\b/i,
