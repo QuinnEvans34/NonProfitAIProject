@@ -1,0 +1,28 @@
+{
+  "id": "02-eviction-imminent",
+  "description": "James-style case: eviction notice for next week, two children food-insecure, recent job loss.",
+  "input": {
+    "qaPairs": [
+      { "question": "What is your first name?", "answer": "James" },
+      { "question": "How would you like us to reach you?", "answer": "text" },
+      { "question": "What kind of help do you need?", "answer": "housing help, possibly food too" },
+      { "question": "Is this urgent?", "answer": "yes, eviction notice for next week" },
+      { "question": "Tell me about your situation.", "answer": "Got an eviction notice, two kids haven't eaten properly in days, my job ended last month and rent is past due." }
+    ],
+    "ruleSignals": {
+      "urgencyFlag": "high",
+      "crisisFlag": false,
+      "triggers": ["high: \"eviction\"", "high: \"kids hungry\""]
+    }
+  },
+  "expect": {
+    "severity": { "atLeast": "high" },
+    "primaryCategory": "Housing",
+    "secondaryIncludes": ["Food"],
+    "riskFlagsTrue": ["eviction_imminent", "food_insecurity", "child_safety"],
+    "urgencyWindow": { "in": ["this_week", "today"] },
+    "recommendedProgramsContains": ["SNAP"],
+    "followUpQuestionsAtLeast": 2,
+    "languageDetected": "en"
+  }
+}

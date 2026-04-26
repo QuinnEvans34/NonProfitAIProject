@@ -1,0 +1,25 @@
+{
+  "id": "04-domestic-abuse",
+  "description": "Client discloses ongoing domestic violence. Crisis floor must trigger; risk flag for domestic_abuse must be set.",
+  "input": {
+    "qaPairs": [
+      { "question": "What is your first name?", "answer": "Dana" },
+      { "question": "How would you like us to reach you?", "answer": "text only, do not call" },
+      { "question": "What kind of help do you need?", "answer": "I need to leave my house safely" },
+      { "question": "Is this urgent?", "answer": "yes, very" },
+      { "question": "Tell me about your situation.", "answer": "My partner has been hitting me. There is ongoing domestic violence and I am scared for myself and my child." }
+    ],
+    "ruleSignals": {
+      "urgencyFlag": "high",
+      "crisisFlag": true,
+      "triggers": ["crisis: \"domestic violence\"", "crisis: \"abuse\"", "high: \"unsafe\""]
+    }
+  },
+  "expect": {
+    "severity": { "atLeast": "crisis" },
+    "riskFlagsTrue": ["domestic_abuse"],
+    "urgencyWindow": { "in": ["today", "this_week"] },
+    "followUpQuestionsAtLeast": 2,
+    "languageDetected": "en"
+  }
+}
