@@ -7,6 +7,7 @@ A local-only prototype of an AI-assisted intake and triage system for nonprofit 
 ## What it does
 
 - **Client intake chat** — A guided conversation collects the client's name, contact preference, area of need, urgency, and situation description. The AI assistant generates natural language responses but the app controls the flow and step order.
+- **Screening questionnaire** — A 17-question 1–5 Likert screener (mental health, physical health, quality of life) runs alongside the chat on the same page. Answers feed the analyzer as additional context and surface on the report as per-section averages with an expandable per-question view. See [`docs/11-screening.md`](docs/11-screening.md).
 - **Urgency detection** — Rule-based keyword matching flags high-urgency and crisis situations automatically.
 - **Summary generation** — After intake completes, the local LLM generates a plain-language summary for staff review.
 - **Staff dashboard** — Case managers can browse all intakes, see urgency flags, review transcripts and summaries, update case status, and add notes.
@@ -180,6 +181,7 @@ After intake completes, the backend sends the transcript and structured answers 
 | `GET` | `/api/intakes` | List all intakes |
 | `GET` | `/api/intakes/:id` | Get a single intake with full transcript |
 | `PATCH` | `/api/intakes/:id` | Update status, staff notes, etc. |
+| `PUT` | `/api/intakes/:id/screening` | Save screening answers (full state, idempotent) |
 | `POST` | `/api/chat/reply` | Raw Ollama chat (for testing) |
 | `POST` | `/api/chat/summary` | Raw summary generation (for testing) |
 

@@ -1,5 +1,8 @@
 // In-memory intake store. No persistence — restarts clear everything.
 
+import { SCREENING_SECTIONS, SCREENING_QUESTION_INDEX, formatScaleAnswer } from './screening-questions.js';
+import { computeSectionAverages, countAnswered } from './screening-stats.js';
+
 const intakes = new Map();
 
 function makeId() {
@@ -29,6 +32,11 @@ function blankIntake() {
     helpScore: null,
     severityOverride: null,
     severityOverrideReason: '',
+
+    // Screening questionnaire (1-5 Likert across 3 sections, 17 questions total)
+    screeningAnswers: { mental_health: {}, physical_health: {}, quality_of_life: {} },
+    screeningComments: { mental_health: '', physical_health: '', quality_of_life: '', general: '' },
+    screeningUpdatedAt: null,
   };
 }
 
@@ -38,13 +46,63 @@ export function buildQAPairs(intake) {
       (m) => m.role === 'user' && m.step === 'ask_urgency'
     )?.content || '';
 
-  return [
+  const chatPairs = [
     { question: 'What is your first name?', answer: intake.clientName || '' },
     { question: 'How would you like us to reach you?', answer: intake.contactPreference || '' },
     { question: 'What kind of help do you need?', answer: intake.needCategory || '' },
     { question: 'Is this urgent or are you planning ahead?', answer: urgencyAnswer },
     { question: 'Tell me about your situation in your own words.', answer: intake.structuredAnswers?.situationSummary || '' },
   ];
+
+  return [...chatPairs, ...buildScreeningPairs(intake.screeningAnswers, intake.screeningComments)];
+}
+
+function buildScreeningPairs(answers, comments = {}) {
+  if (!answers) return [];
+
+  const pairs = [];
+  for (const section of SCREENING_SECTIONS) {
+    for (const q of section.questions) {
+      const value = answers[section.id]?.[q.id];
+      if (!Number.isInteger(value) || value < 1 || value > 5) continue;
+
+      const meta = SCREENING_QUESTION_INDEX[q.id];
+      pairs.push({
+        question: `${section.label} screening — ${meta.text} (1 = ${meta.lowLabel}, 5 = ${meta.highLabel})`,
+        answer: formatScaleAnswer(value, meta.lowLabel, meta.highLabel),
+      });
+    }
+  }
+
+  const averages = computeSectionAverages(answers);
+  const counts = countAnswered(answers).by_section;
+  for (const section of SCREENING_SECTIONS) {
+    const avg = averages[section.id];
+    if (avg == null) continue;
+    pairs.push({
+      question: `${section.label} screening — section average`,
+      answer: `${avg.toFixed(1)} of 5 across ${counts[section.id]} answered question${counts[section.id] === 1 ? '' : 's'}`,
+    });
+  }
+
+  // Section comments
+  for (const section of SCREENING_SECTIONS) {
+    const comment = comments[section.id];
+    if (comment && typeof comment === 'string' && comment.trim()) {
+      pairs.push({
+        question: `${section.label} screening — additional comments`,
+        answer: comment.trim(),
+      });
+    }
+  }
+  if (comments.general && typeof comments.general === 'string' && comments.general.trim()) {
+    pairs.push({
+      question: 'General comments',
+      answer: comments.general.trim(),
+    });
+  }
+
+  return pairs;
 }
 
 export function create(overrides = {}) {

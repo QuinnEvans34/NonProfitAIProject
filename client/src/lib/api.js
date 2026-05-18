@@ -20,6 +20,8 @@ export const api = {
   listIntakes:        ()       => request('GET',   '/api/intakes'),
   patchIntake:        (id, p)  => request('PATCH', `/api/intakes/${id}`, p),
   reanalyzeIntake:    (id)     => request('POST',  `/api/intakes/${id}/reanalyze`),
+  saveScreening:      (id, screeningAnswers, screeningComments) =>
+                                   request('PUT',   `/api/intakes/${id}/screening`, { screeningAnswers, screeningComments }),
 
   // Admin (placeholders — endpoints come in prompt 07)
   listKeywords:       ()       => request('GET',   '/api/admin/keywords'),

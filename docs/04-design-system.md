@@ -60,8 +60,7 @@ Append to `:root` in `client/src/index.css`:
 --space-10: 2.5rem;
 ```
 
-Don't migrate every existing inline rem to these tokens. Use them in **new**
-code (Admin, Reports, IntakeDetail redesign). Existing IntakeChat stays as-is.
+Don't migrate every existing inline rem to these tokens. Use them in new code.
 
 ## Typography rules
 
@@ -198,6 +197,59 @@ Help-score widget. SVG circle, two arcs (track + fill), number centered.
 56-px ring on cards, 40-px ring on table rows. Color of fill comes from
 `--score-fill-*` based on severity band, not score range, so it lines up
 visually with the severity pill on the same row.
+
+### `ScaleSelector`
+1–5 Likert pip selector used by the screening questionnaire on the intake
+page and (in `readOnly` mode) by the screening overview card on the intake
+detail page.
+
+```
+○──○──○──●──○
+Not at all    Nearly every day
+```
+
+- Five 32-px circle pips connected by a 1-px hairline in
+  `--color-border-light`.
+- Selected pip: `--color-brand` background, white numeral, 1.5px
+  `--color-brand` border.
+- Hover (interactive only): brand-muted border + `--color-brand-light`
+  background.
+- Focus ring: 2-px `--color-brand` outline with 2-px offset.
+- Keyboard: `ArrowLeft`/`ArrowRight` cycle, `Home`/`End` jump to 1/5,
+  number keys `1`–`5` set directly.
+- ARIA: `role="radiogroup"` on the wrapper with `aria-label` set to the
+  question text; `role="radio"` `aria-checked` on each pip.
+- `readOnly` swaps `<button>` for `<span>` and drops handlers — same
+  visuals; used for snapshot rendering on the report.
+
+### Intake form inputs
+
+`.form-input` and `.form-textarea` — standard inputs used on the intake
+contact form. Match the existing focus ring (`--color-brand` border +
+`--color-brand-light` box-shadow). Add `.form-input--error` to switch to a
+red border (`#dc2626`) with a red focus ring (`#fee2e2`).
+
+```jsx
+<input className={`form-input${hasError ? ' form-input--error' : ''}`} />
+```
+
+Field labels that have errors additionally show an inline red suffix:
+`"— Required"` or `"— Enter phone or email"`. This keeps the validation
+message spatially attached to the field without a separate block element.
+
+### Intake page shell
+
+`.intake-page` — outer flex-column wrapper for the intake page:
+`height: calc(100vh - nav)`, `overflow: hidden`. Children:
+- `.layout-split` with `flex: 1; min-height: 0` — the two-panel grid.
+- `.intake-footer` — slim bar at the bottom for the emergency contact line.
+
+`min-width: 769px` is set on `body` so the layout never reaches the 768px
+stacking breakpoint; the browser shows a scrollbar instead.
+
+`.sidebar-desktop-only` — hides sidebar info boxes (heading, about-card,
+screening progress) on narrow viewports so the horizontal sidebar bar stays
+compact.
 
 ### `empty-state`
 For pages with no data yet:

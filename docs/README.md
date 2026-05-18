@@ -28,13 +28,13 @@ prompts in `/prompts` reference. If a prompt and a doc disagree, the doc wins.
 | `08-page-dashboard.md` | Dashboard polish (icons + score column) |
 | `09-eval-harness.md` | Golden-set evaluation harness for the analyzer |
 | `10-conventions.md` | Code, naming, and UX conventions across the project |
+| `11-screening.md` | 17-question 1–5 Likert screener that feeds the analyzer |
+| `12-page-intake.md` | Intake page — 4-step form flow (Welcome → Contact → Questionnaire → Review) |
 
 ## What's deliberately not in here
 
 - **Database / persistence.** Discussion pending the Monday meeting. We're
   staying on the existing in-memory `server/store.js` until that lands.
 - **Auth.** Out of scope for the demo per the existing README.
-- **Questionnaire UI.** Owned by Ted. The analyzer treats his Q/A list as
-  input — we don't dictate his form structure.
 - **Hosted LLM provider.** The company will choose. We build to a clean
   provider interface so swapping is one file.

@@ -22,6 +22,15 @@ intake-flow.js  →  on completion  →  analyzer.analyzeIntake(qaPairs, ruleSig
                                      persist on the intake record
 ```
 
+`qaPairs` are now built from two sources, both stitched together by
+`buildQAPairs(intake)` in `server/store.js`:
+
+1. The five chat-derived pairs from the existing intake-flow steps.
+2. The screening questionnaire — one Q/A per answered question (1–5 Likert
+   across 3 sections, 17 questions total) plus one synthetic Q/A per
+   answered section summarizing the average. See
+   [`11-screening.md`](11-screening.md).
+
 ## Backend file layout (new + modified)
 
 ```
@@ -33,6 +42,8 @@ server/
 ├── intake-flow.js        # MODIFY — call analyzer at completion
 ├── urgency.js            # KEEP — regex floor for crisis detection
 ├── help-score.js         # NEW — pure deterministic score function
+├── screening-questions.js  # NEW — 17-question screener (server copy of client constants)
+├── screening-stats.js      # NEW — section averages + answered counts
 ├── llm/                  # NEW — everything analyzer-related lives here
 │   ├── analyzer.js       # public: analyzeIntake(qaPairs, ruleSignals)
 │   ├── schema.js         # zod schema + types for AnalysisResult
@@ -56,7 +67,7 @@ server/
 client/src/
 ├── App.jsx               # MODIFY — add /admin and /reports routes
 ├── pages/
-│   ├── IntakeChat.jsx    # unchanged this sprint (Ted's territory)
+│   ├── IntakeChat.jsx    # MODIFY — 4-step form stepper replacing chat-driven flow
 │   ├── Dashboard.jsx     # MODIFY — add help score column, lucide icons
 │   ├── IntakeDetail.jsx  # MODIFY — render new analysis fields
 │   ├── Admin.jsx         # NEW
@@ -82,22 +93,30 @@ with 50 different lucide imports scattered across files.
 
 ## Data flow on intake completion
 
-1. The user confirms in the chat composer (existing behavior).
-2. `intake-flow.js` advances `currentStep` to `complete` and marks status
-   `submitted`.
-3. Instead of calling `generateSummary` (the legacy single-paragraph thing),
-   it calls `analyzer.analyzeIntake(qaPairs, ruleSignals)`:
-   - `qaPairs` is built from the structured fields the flow already collected,
-     plus an entry for the free-text situation answer.
-   - `ruleSignals` is the existing `assessTranscript(intake.transcript)`
-     output — the regex layer's verdict, used as the severity floor.
+The intake page is now a **form-based 4-step stepper** (see
+[`12-page-intake.md`](12-page-intake.md)). The AI chat assistant is a
+side popover, not the primary intake mechanism.
+
+1. The client fills out the form (Welcome → Contact → Health Questionnaire →
+   Review & Submit).
+2. On submit, the frontend PATCHes `currentStep: 'complete'` and status
+   `submitted`, then calls `POST /api/intakes/:id/reanalyze` (which runs
+   `runAnalyzer`).
+3. `runAnalyzer` calls `buildQAPairs(intake)` to assemble the Q/A list from
+   structured fields + screening answers, then calls
+   `analyzer.analyzeIntake(qaPairs, ruleSignals)`:
+   - `qaPairs` comes from `clientName`, `contactPreference`, and the 17
+     screening questions (see [`11-screening.md`](11-screening.md)).
+   - `ruleSignals` is `assessTranscript(intake.transcript)` — the regex
+     floor. For form-only intakes the transcript is empty, so `ruleSignals`
+     contributes no triggers; the LLM verdict is used as-is.
 4. The analyzer hits the configured provider (Ollama by default), parses the
    response as JSON, validates against the zod schema, retries once if
    invalid, then returns a typed `AnalysisResult`.
-5. `intake-flow.js` applies the floor rule (LLM severity is clamped to be at
-   least as high as `ruleSignals.urgencyFlag`), computes `helpScore` from
-   `help-score.js`, and persists everything onto the intake record.
-6. The frontend dashboard polls or refetches and now sees rich fields.
+5. `runAnalyzer` applies the floor rule, computes `helpScore`, and persists
+   everything onto the intake record.
+6. The frontend polls `GET /api/intakes/:id` every 2.5 s until `summary`
+   appears, then shows it on the confirmation screen.
 
 ## Persistence shape
 

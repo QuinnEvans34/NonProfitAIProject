@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as store from '../store.js';
 import { startIntake, processMessage, runAnalyzer } from '../intake-flow.js';
+import { SCREENING_SECTIONS, SCREENING_QUESTION_INDEX } from '../screening-questions.js';
 
 const router = Router();
 
@@ -64,6 +65,65 @@ router.post('/:id/reanalyze', async (req, res) => {
     console.error('reanalyze error:', err);
     res.status(500).json({ error: 'Failed to re-analyze' });
   }
+});
+
+// PUT /api/intakes/:id/screening — full set of screening answers (idempotent)
+// Locked once analyzer has finished so qaPairs stays stable.
+router.put('/:id/screening', (req, res) => {
+  const intake = store.getById(req.params.id);
+  if (!intake) return res.status(404).json({ error: 'Intake not found' });
+
+  if (intake.currentStep === 'complete' && intake.analysis) {
+    return res.status(400).json({ error: 'Editing locked — analysis has finished' });
+  }
+
+  const { screeningAnswers, screeningComments } = req.body || {};
+  if (!screeningAnswers || typeof screeningAnswers !== 'object' || Array.isArray(screeningAnswers)) {
+    return res.status(400).json({ error: 'screeningAnswers object is required' });
+  }
+
+  const validSectionIds = new Set(SCREENING_SECTIONS.map((s) => s.id));
+  const cleaned = { mental_health: {}, physical_health: {}, quality_of_life: {} };
+
+  for (const [sectionId, questions] of Object.entries(screeningAnswers)) {
+    if (!validSectionIds.has(sectionId)) {
+      return res.status(400).json({ error: `Unknown section id: ${sectionId}` });
+    }
+    if (!questions || typeof questions !== 'object' || Array.isArray(questions)) {
+      return res.status(400).json({ error: `Section ${sectionId} must be an object` });
+    }
+    for (const [questionId, value] of Object.entries(questions)) {
+      const meta = SCREENING_QUESTION_INDEX[questionId];
+      if (!meta || meta.sectionId !== sectionId) {
+        return res.status(400).json({ error: `Unknown question id for section ${sectionId}: ${questionId}` });
+      }
+      if (!Number.isInteger(value) || value < 1 || value > 5) {
+        return res.status(400).json({ error: `Value for ${questionId} must be an integer 1-5` });
+      }
+      cleaned[sectionId][questionId] = value;
+    }
+  }
+
+  const validCommentKeys = new Set(['mental_health', 'physical_health', 'quality_of_life', 'general']);
+  const cleanedComments = { mental_health: '', physical_health: '', quality_of_life: '', general: '' };
+  if (screeningComments && typeof screeningComments === 'object' && !Array.isArray(screeningComments)) {
+    for (const [key, val] of Object.entries(screeningComments)) {
+      if (!validCommentKeys.has(key)) {
+        return res.status(400).json({ error: `Unknown comment key: ${key}` });
+      }
+      if (typeof val !== 'string') {
+        return res.status(400).json({ error: `Comment ${key} must be a string` });
+      }
+      cleanedComments[key] = val;
+    }
+  }
+
+  const updated = store.update(req.params.id, {
+    screeningAnswers: cleaned,
+    screeningComments: cleanedComments,
+    screeningUpdatedAt: new Date().toISOString(),
+  });
+  res.json(updated);
 });
 
 // PATCH /api/intakes/:id — update allowed fields

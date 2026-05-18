@@ -19,12 +19,37 @@ The main column now shows, top to bottom:
 
 1. **Header strip** — client name, severity pill, help-score ring, category pill.
 2. **AI Summary card** — staff_facing copy + Re-run analysis button.
-3. **Help Score breakdown card** — score, components, "why this score".
-4. **Recommended Programs card** — list of programs with reasons.
-5. **AI Comments card** — list of comments grouped by type.
-6. **Follow-up Questions card** — bullet list for the case manager call.
-7. **Client's Own Words card** — kept, but now also shows the full Q/A list.
-8. **Conversation Transcript card** — kept.
+3. **Screening overview card** — per-section averages with expand-to-view
+   per-question answers. See `Screening overview card` below and
+   [`11-screening.md`](11-screening.md) for the polarity caveat.
+4. **Help Score breakdown card** — score, components, "why this score".
+5. **Recommended Programs card** — list of programs with reasons.
+6. **AI Comments card** — list of comments grouped by type.
+7. **Follow-up Questions card** — bullet list for the case manager call.
+8. **Client's Own Words card** — kept, but now also shows the full Q/A list
+   (including the screening Q/As after analyzer runs).
+9. **Conversation Transcript card** — kept.
+
+## Screening overview card
+
+```
+┌─ Screening overview ─────────────────── 12 of 17 answered ──┐
+│ Averages are raw — some scales positively worded, others    │
+│ negatively. See docs/11-screening.md.                       │
+│                                                             │
+│  Mental health        3.4   [▶ View questions]              │
+│  Physical health      —     [▶ View questions]              │
+│  Quality of life      4.1   [▶ View questions]              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Each row is collapsed by default. Clicking **View questions** expands the
+section into a list of question text + read-only `ScaleSelector` showing the
+picked pip; unanswered questions render with no pip filled and a muted
+"Not answered" caption.
+
+If the client did not interact with the questionnaire at all, the card
+renders an empty state instead of three "—" rows.
 
 The side rail gets:
 

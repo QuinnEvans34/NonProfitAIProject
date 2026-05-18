@@ -6,15 +6,20 @@ import HelpScore from '../components/HelpScore.jsx';
 import SeverityPill from '../components/SeverityPill.jsx';
 import AICommentList from '../components/AICommentList.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import ScaleSelector from '../components/ScaleSelector.jsx';
 import {
   RefreshCw,
   ClipboardList,
   Check,
   Minus,
   Sparkles,
+  ChevronDown,
+  ChevronRight,
   PROGRAM_ICONS,
 } from '../lib/icons.js';
 import { api } from '../lib/api.js';
+import { SCREENING_SECTIONS, TOTAL_QUESTION_COUNT } from '../lib/screening-questions.js';
+import { computeSectionAverages, countAnswered, isEmpty as isScreeningEmpty } from '../lib/screening-stats.js';
 
 const RISK_FLAG_KEYS = [
   'self_harm',
@@ -319,6 +324,9 @@ export default function IntakeDetail() {
               AI-generated. Verify against the transcript below.
             </p>
           </section>
+
+          {/* Screening Overview */}
+          <ScreeningOverviewCard intake={intake} />
 
           {/* Help Score breakdown */}
           {!isLegacy && (
@@ -686,6 +694,204 @@ function ClientWordsCard({ intake }) {
             margin: 0,
           }}>
             {fallback}
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ScreeningOverviewCard({ intake }) {
+  const answers = intake.screeningAnswers || { mental_health: {}, physical_health: {}, quality_of_life: {} };
+  const comments = intake.screeningComments || { mental_health: '', physical_health: '', quality_of_life: '', general: '' };
+  const empty = isScreeningEmpty(answers) && !Object.values(comments).some(Boolean);
+  const [expanded, setExpanded] = useState({
+    mental_health: false,
+    physical_health: false,
+    quality_of_life: false,
+  });
+
+  if (empty) {
+    return (
+      <section className="card">
+        <h2 style={{ ...sectionTitle, marginBottom: 'var(--space-3)' }}>Screening overview</h2>
+        <EmptyState
+          icon={ClipboardList}
+          title="No screening data"
+          body="The client did not interact with the screening questionnaire."
+        />
+      </section>
+    );
+  }
+
+  const averages = computeSectionAverages(answers);
+  const counts = countAnswered(answers);
+
+  function toggle(sectionId) {
+    setExpanded((e) => ({ ...e, [sectionId]: !e[sectionId] }));
+  }
+
+  return (
+    <section className="card">
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 'var(--space-2)',
+        gap: 'var(--space-2)',
+      }}>
+        <h2 style={sectionTitle}>Screening overview</h2>
+        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-tertiary)' }}>
+          {counts.total} of {TOTAL_QUESTION_COUNT} answered
+        </span>
+      </div>
+
+      <p style={{
+        fontSize: 'var(--text-xs)',
+        color: 'var(--color-text-tertiary)',
+        marginBottom: 'var(--space-3)',
+        lineHeight: 1.55,
+      }}>
+        Averages are raw across answered questions. Some scales are positively worded (higher = better) and others negatively worded (higher = worse) — see <code>docs/11-screening.md</code>.
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginBottom: comments.general ? 'var(--space-4)' : 0 }}>
+        {SCREENING_SECTIONS.map((section) => {
+          const avg = averages[section.id];
+          const sectionAnswered = counts.by_section[section.id];
+          const isOpen = expanded[section.id];
+          const Icon = isOpen ? ChevronDown : ChevronRight;
+
+          return (
+            <div key={section.id} style={{
+              border: '1px solid var(--color-border-light)',
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--color-surface-raised)',
+            }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr auto auto',
+                alignItems: 'center',
+                gap: 'var(--space-3)',
+                padding: 'var(--space-3) var(--space-4)',
+              }}>
+                <div>
+                  <div style={{ fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                    {section.label}
+                  </div>
+                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-tertiary)', marginTop: 2 }}>
+                    {sectionAnswered} of {section.questions.length} answered
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 'var(--text-xl)',
+                  fontWeight: 700,
+                  color: avg == null ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                  fontFeatureSettings: '"tnum"',
+                  minWidth: 48,
+                  textAlign: 'right',
+                }}>
+                  {avg == null ? '—' : avg.toFixed(1)}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => toggle(section.id)}
+                  className="btn-secondary"
+                  style={{
+                    fontSize: 'var(--text-xs)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-1)',
+                  }}
+                  aria-expanded={isOpen}
+                >
+                  <Icon size={12} aria-hidden />
+                  {isOpen ? 'Hide questions' : 'View questions'}
+                </button>
+              </div>
+
+              {isOpen && (
+                <div style={{
+                  borderTop: '1px solid var(--color-border-light)',
+                  padding: 'var(--space-4)',
+                  background: 'var(--color-surface)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--space-4)',
+                }}>
+                  {section.questions.map((q) => {
+                    const value = answers[section.id]?.[q.id] ?? null;
+                    return (
+                      <div key={q.id}>
+                        <div style={{
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--color-text-primary)',
+                          lineHeight: 1.55,
+                          marginBottom: 'var(--space-2)',
+                        }}>
+                          {q.text}
+                        </div>
+                        <ScaleSelector
+                          value={value}
+                          lowLabel={q.lowLabel}
+                          highLabel={q.highLabel}
+                          questionId={`detail_${q.id}`}
+                          questionText={q.text}
+                          readOnly
+                        />
+                        {value == null && (
+                          <div style={{
+                            fontSize: 'var(--text-xs)',
+                            color: 'var(--color-text-tertiary)',
+                            fontStyle: 'italic',
+                            marginTop: '0.25rem',
+                          }}>
+                            Not answered
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {comments[section.id] && (
+                    <div style={{
+                      paddingTop: 'var(--space-3)',
+                      borderTop: '1px dashed var(--color-border-light)',
+                    }}>
+                      <div style={fieldLabel}>Comments</div>
+                      <p style={{
+                        fontSize: 'var(--text-sm)',
+                        color: 'var(--color-text-secondary)',
+                        lineHeight: 1.6,
+                        margin: 0,
+                        whiteSpace: 'pre-wrap',
+                      }}>
+                        {comments[section.id]}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {comments.general && (
+        <div style={{
+          marginTop: 'var(--space-3)',
+          padding: 'var(--space-3) var(--space-4)',
+          background: 'var(--color-surface-raised)',
+          border: '1px solid var(--color-border-light)',
+          borderRadius: 'var(--radius-sm)',
+        }}>
+          <div style={fieldLabel}>General comments</div>
+          <p style={{
+            fontSize: 'var(--text-sm)',
+            color: 'var(--color-text-secondary)',
+            lineHeight: 1.6,
+            margin: 0,
+            whiteSpace: 'pre-wrap',
+          }}>
+            {comments.general}
           </p>
         </div>
       )}
