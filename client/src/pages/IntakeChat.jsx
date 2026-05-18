@@ -426,7 +426,7 @@ export default function IntakeChat() {
 
       {/* ── Floating chat popover (bottom-LEFT to avoid Next button) ── */}
       {chatOpen && (
-        <div className="chat-popover chat-popover--left" role="dialog" aria-label="Help assistant chat">
+        <div className="chat-popover" role="dialog" aria-label="Help assistant chat">
           <div className="chat-popover-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <MessageSquare size={15} aria-hidden style={{ color: 'var(--color-brand)' }} />
@@ -508,7 +508,7 @@ export default function IntakeChat() {
 
       <button
         type="button"
-        className="chat-fab chat-fab--left"
+        className="chat-fab"
         onClick={chatOpen ? () => setChatOpen(false) : openChat}
         aria-label={chatOpen ? 'Close chat' : 'Open help chat'}
         aria-expanded={chatOpen}
@@ -714,7 +714,7 @@ function ScreeningStep({
   onBack, onNext,
 }) {
   return (
-    <>
+    <div style={{ maxWidth: '680px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', flex: 1 }}>
       <StepHeader
         title="Health questionnaire"
         subtitle="A few short questions about how you're doing. Skip anything you'd rather not answer."
@@ -817,7 +817,7 @@ function ScreeningStep({
           {screeningError}
         </p>
       )}
-    </>
+    </div>
   );
 }
 
