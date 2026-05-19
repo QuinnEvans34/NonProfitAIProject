@@ -250,9 +250,8 @@ export async function runAnalyzer(intakeId) {
   const start = Date.now();
 
   try {
-    const qaPairs = buildQAPairs(intake);
     const ruleSignals = assessTranscript(intake.transcript);
-    const analysis = await analyzeIntake(qaPairs, ruleSignals);
+    const analysis = await analyzeIntake(intake, ruleSignals);
     const { score: helpScore } = computeHelpScore(analysis);
 
     const severityToUrgency = { crisis: 'high', high: 'high', medium: 'medium', low: 'low' };
@@ -260,7 +259,7 @@ export async function runAnalyzer(intakeId) {
     const crisisFlag = analysis.severity.level === 'crisis' || ruleSignals.crisisFlag;
 
     const patch = {
-      qaPairs,
+      qaPairs: buildQAPairs(intake),
       analysis,
       helpScore,
       summary: analysis.summary.staff_facing,

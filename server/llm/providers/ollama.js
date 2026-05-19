@@ -1,7 +1,7 @@
 // Ollama JSON-mode provider for the structured analyzer.
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen3:30b';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen3:8b';
 
 function stripThinking(text) {
   return text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();

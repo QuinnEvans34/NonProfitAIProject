@@ -1,0 +1,103 @@
+{
+  "id": "ink_seed_04",
+  "createdAt": "2026-05-19T18:15:00.000Z",
+  "status": "submitted",
+  "currentStep": "complete",
+  "isDemoData": true,
+
+  "clientName": "James Thompson",
+  "contactPreference": "text: (555) 0173-6620",
+  "needCategory": "Housing",
+  "urgencyFlag": "high",
+  "crisisFlag": false,
+
+  "structuredAnswers": {
+    "firstName": "James",
+    "lastName": "Thompson",
+    "phone": "(555) 0173-6620",
+    "email": "",
+    "address": "3344 Oak Park Lane",
+    "city": "Springfield",
+    "zip": "62703",
+    "situationSummary": "I got an eviction notice yesterday. I have until Friday to leave. I have a 6-year-old daughter with me and no family nearby. I don't know where we're going to go."
+  },
+
+  "screeningAnswers": {
+    "mental_health":   { "mh_1": 3, "mh_2": 5, "mh_3": 4, "mh_4": 4, "mh_5": 2 },
+    "physical_health": { "ph_1": 2, "ph_2": 4, "ph_3": 3, "ph_4": 3, "ph_5": 2 },
+    "quality_of_life": { "qol_1": 2, "qol_2": 4, "qol_3": 1, "qol_4": 1, "qol_5": 1, "qol_6": 3, "qol_7": 1 }
+  },
+  "screeningComments": {
+    "mental_health":   "Hard to sleep. I keep running through Friday in my head.",
+    "physical_health": "",
+    "quality_of_life": "",
+    "general":         "Please text only — I can't take calls at work and I don't want to scare my daughter."
+  },
+  "screeningUpdatedAt": "2026-05-19T18:15:00.000Z",
+
+  "transcript": [
+    { "role": "assistant", "content": "Hi James — I'm an AI intake assistant. A human case manager will review everything. Ready to start?", "step": "greeting" },
+    { "role": "user",      "content": "Yes please, I need help fast.", "step": "ask_name" },
+    { "role": "assistant", "content": "Thanks James. A Hope Connector will text you soon with emergency housing and legal options.", "step": "complete" }
+  ],
+
+  "qaPairs": [
+    { "question": "What is your first name?",                          "answer": "James" },
+    { "question": "How would you like us to reach you?",               "answer": "text: (555) 0173-6620" },
+    { "question": "What kind of help do you need?",                    "answer": "Housing" },
+    { "question": "Is this urgent or are you planning ahead?",         "answer": "Urgent — eviction is Friday." },
+    { "question": "Tell me about your situation in your own words.",   "answer": "Eviction notice, Friday deadline, 6-year-old daughter, no family nearby." }
+  ],
+
+  "analysis": {
+    "summary": {
+      "staff_facing": "Client received an eviction notice with a Friday deadline and is the sole caregiver for a 6-year-old daughter. He reports no family support nearby and no plan for where they will go. Acute housing crisis with a minor child involved; emergency shelter coordination and legal aid should both be engaged today. Client requests text-only contact to avoid alarming his daughter.",
+      "client_facing": "James, a Hope Connector will text you very soon to help with emergency shelter options and connect you to free legal help about the eviction. You and your daughter are not alone in this."
+    },
+    "classification": {
+      "primary_category": "Housing",
+      "secondary_categories": ["Legal", "Food"],
+      "tags": ["eviction_imminent", "has_minor_child", "no_family_support", "friday_deadline", "text_only_contact"]
+    },
+    "severity": {
+      "level": "high",
+      "score": 80,
+      "confidence": 0.88,
+      "rationale": "Eviction within four days plus a minor child in the household and no family support creates an acute high-severity housing case.",
+      "signals": ["eviction notice with Friday deadline", "6-year-old daughter present", "no family nearby"]
+    },
+    "risk_flags": {
+      "self_harm": false,
+      "domestic_abuse": false,
+      "child_safety": true,
+      "eviction_imminent": true,
+      "food_insecurity": false,
+      "medical_emergency": false,
+      "substance_abuse": false,
+      "isolation": false
+    },
+    "urgency_window": "this_week",
+    "recommended_programs": [
+      { "name": "Local shelter network", "reason": "Eviction is imminent and a minor child is in the household; emergency shelter is the first priority.", "source": "hardcoded" },
+      { "name": "Legal Aid", "reason": "Free legal help may be able to delay the eviction or surface tenant rights options.", "source": "hardcoded" },
+      { "name": "SNAP", "reason": "Reduces household budget pressure during a housing transition.", "source": "hardcoded" },
+      { "name": "Local school liaison", "reason": "School district homeless liaisons can keep the 6-year-old enrolled through any move.", "source": "directory" }
+    ],
+    "follow_up_questions": [
+      "Confirm the exact eviction date and whether the notice has been served in writing.",
+      "Ask whether the daughter is currently in school and which district she attends.",
+      "Ask whether James has identification and essential documents accessible.",
+      "Ask whether anyone else (co-parent, relative) could share custody for a few nights if needed."
+    ],
+    "ai_comments": [
+      { "type": "flag",       "text": "Text-only contact requested — do NOT call this client." },
+      { "type": "flag",       "text": "Minor child in household; coordinate with school district homeless liaison before any change of address." },
+      { "type": "suggestion", "text": "Connect Legal Aid and shelter intake in parallel — they don't depend on each other." }
+    ],
+    "keywords_extracted": ["eviction notice", "Friday deadline", "6-year-old daughter", "no family", "text only", "Springfield"],
+    "language_detected": "en",
+    "model_meta": { "model": "seed", "provider": "mock", "ms": 0, "schema_version": "1.0" }
+  },
+
+  "helpScore": null
+}

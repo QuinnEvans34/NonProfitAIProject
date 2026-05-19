@@ -4,6 +4,7 @@ import { StatusBadge, STATUSES } from '../components/StatusBadge.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import SeverityPill from '../components/SeverityPill.jsx';
 import ScoreRing from '../components/ScoreRing.jsx';
+import { api } from '../lib/api.js';
 import {
   RefreshCw,
   ClipboardList,
@@ -31,12 +32,61 @@ const URGENCY_BORDER = {
   low: 'transparent',
 };
 
+const SEVERITY_RANK = { crisis: 0, high: 1, medium: 2, low: 3 };
+
+function severityOf(intake) {
+  return intake.analysis?.severity?.level || intake.urgencyFlag || 'low';
+}
+
+function compareIntakes(a, b) {
+  const aRank = SEVERITY_RANK[severityOf(a)] ?? 4;
+  const bRank = SEVERITY_RANK[severityOf(b)] ?? 4;
+  if (aRank !== bRank) return aRank - bRank;
+  return new Date(b.createdAt) - new Date(a.createdAt);
+}
+
 const SpinningRefresh = (props) => (
   <RefreshCw {...props} style={{ animation: 'dashboard-spin 1s linear infinite' }} />
 );
 
+function KpiCell({ label, value }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', minWidth: 120 }}>
+      <span style={{
+        fontSize: 'var(--text-xs)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: 'var(--color-text-tertiary)',
+        fontWeight: 600,
+      }}>
+        {label}
+      </span>
+      <span style={{
+        fontSize: 'var(--text-2xl)',
+        fontWeight: 700,
+        color: 'var(--color-text-primary)',
+        fontFeatureSettings: '"tnum"',
+        lineHeight: 1,
+      }}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function KpiDivider() {
+  return (
+    <div aria-hidden style={{
+      width: 1,
+      alignSelf: 'stretch',
+      background: 'var(--color-border-light)',
+    }} />
+  );
+}
+
 export default function Dashboard() {
   const [intakes, setIntakes] = useState([]);
+  const [kpis, setKpis] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [urgencyFilter, setUrgencyFilter] = useState('all');
@@ -49,6 +99,14 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    api.reportSummary({ range: 'all' })
+      .then((data) => { if (!cancelled) setKpis(data.kpis); })
+      .catch(() => { /* silent — KPI strip just won't render */ });
+    return () => { cancelled = true; };
+  }, [intakes.length]);
+
   async function fetchIntakes() {
     try {
       const res = await fetch('/api/intakes');
@@ -59,12 +117,14 @@ export default function Dashboard() {
     setLoading(false);
   }
 
-  const filtered = intakes.filter((i) => {
-    if (statusFilter !== 'all' && i.status !== statusFilter) return false;
-    const effectiveLevel = i.analysis?.severity?.level || i.urgencyFlag;
-    if (urgencyFilter !== 'all' && effectiveLevel !== urgencyFilter) return false;
-    return true;
-  });
+  const filtered = intakes
+    .filter((i) => {
+      if (statusFilter !== 'all' && i.status !== statusFilter) return false;
+      const effectiveLevel = i.analysis?.severity?.level || i.urgencyFlag;
+      if (urgencyFilter !== 'all' && effectiveLevel !== urgencyFilter) return false;
+      return true;
+    })
+    .sort(compareIntakes);
 
   const urgentCount = intakes.filter((i) => i.urgencyFlag === 'high' && i.status !== 'closed').length;
   const activeFilters = statusFilter !== 'all' || urgencyFilter !== 'all';
@@ -83,6 +143,26 @@ export default function Dashboard() {
     <div className="page">
       <style>{`@keyframes dashboard-spin { to { transform: rotate(360deg); } }`}</style>
       <div className="layout-dashboard">
+        {/* KPI strip */}
+        {kpis && (
+          <div style={{
+            display: 'flex',
+            gap: 'var(--space-4)',
+            alignItems: 'center',
+            padding: 'var(--space-3) var(--space-4)',
+            background: 'var(--color-surface-raised)',
+            border: '1px solid var(--color-border-light)',
+            borderRadius: 'var(--radius-md)',
+            marginBottom: 'var(--space-4)',
+          }}>
+            <KpiCell label="Total intakes" value={kpis.totalIntakes} />
+            <KpiDivider />
+            <KpiCell label="High + Crisis" value={kpis.highOrCrisisCount} />
+            <KpiDivider />
+            <KpiCell label="Avg help score" value={kpis.averageHelpScore} />
+          </div>
+        )}
+
         {/* Header bar */}
         <div style={{
           display: 'flex',
@@ -229,6 +309,21 @@ export default function Dashboard() {
                           <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>
                             {intake.clientName || '(unnamed)'}
                           </span>
+                          {intake.isDemoData && (
+                            <span style={{
+                              fontSize: 'var(--text-xs)',
+                              fontWeight: 700,
+                              letterSpacing: '0.05em',
+                              color: 'var(--color-text-tertiary)',
+                              background: 'var(--color-surface-raised)',
+                              border: '1px solid var(--color-border-light)',
+                              borderRadius: 'var(--radius-xs)',
+                              padding: '0.05rem 0.35rem',
+                              textTransform: 'uppercase',
+                            }}>
+                              Demo
+                            </span>
+                          )}
                         </span>
                       </td>
                       <td style={{ ...td, color: 'var(--color-text-secondary)' }}>

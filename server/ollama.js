@@ -2,7 +2,7 @@
 // ── Model warm-up and summary generation are the two key reliability points ──
 
 const OLLAMA_BASE_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
-const DEFAULT_MODEL = process.env.OLLAMA_MODEL || 'qwen3:30b';
+const DEFAULT_MODEL = process.env.OLLAMA_MODEL || 'qwen3:8b';
 
 // ── Thinking-tag cleanup ──
 // qwen3 models emit <think>...</think> blocks by default. Strip them from all

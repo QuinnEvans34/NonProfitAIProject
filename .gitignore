@@ -4,3 +4,9 @@ dist/
 *.log
 data.json
 .DS_Store
+
+# SQLite — seeds are code; the DB itself is local-only.
+server/data/*.db
+server/data/*.db-wal
+server/data/*.db-shm
+server/data/*.db-journal

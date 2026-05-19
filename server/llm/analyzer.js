@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateAnalysis } from './schema.js';
 import { getProvider } from './providers/index.js';
+import { buildClientBlock, buildScreeningBlock, buildQAPairs } from '../store.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROMPT_TEMPLATE = fs.readFileSync(
@@ -13,42 +14,6 @@ const PROMPT_TEMPLATE = fs.readFileSync(
 );
 
 const SEVERITY_RANK = { low: 0, medium: 1, high: 2, crisis: 3 };
-
-const SCHEMA_BLOCK = `Schema for the JSON object you must return:
-
-summary.staff_facing                 string   3-5 sentences, cautious, no qualification claims, max 800 chars
-summary.client_facing                string   1-2 sentences, warm, max 800 chars
-classification.primary_category      string   one of: Housing, Food, Healthcare, Employment, Legal, Utilities, Other
-classification.secondary_categories  string[] 0-3 from the same list, no duplicate of primary
-classification.tags                  string[] 0-8, lowercase_snake_case, /^[a-z][a-z0-9_]{1,38}$/
-severity.level                       string   one of: low, medium, high, crisis
-severity.score                       integer  0-100
-severity.confidence                  number   0-1
-severity.rationale                   string   1-2 sentences
-severity.signals                     string[] phrases from the input that drove the call
-risk_flags.self_harm                 boolean
-risk_flags.domestic_abuse            boolean
-risk_flags.child_safety              boolean
-risk_flags.eviction_imminent         boolean
-risk_flags.food_insecurity           boolean
-risk_flags.medical_emergency         boolean
-risk_flags.substance_abuse           boolean
-risk_flags.isolation                 boolean
-urgency_window                       string   one of: today, this_week, this_month, planning
-recommended_programs                 array of { name, reason, source }, 0-6 items; source one of: hardcoded, web, directory, inferred
-follow_up_questions                  string[] 2-5 items, written for the case manager
-ai_comments                          array of { type, text }, 0-6 items; type one of: context, flag, suggestion, clarification
-keywords_extracted                   string[] 5-15 short verbatim phrases from the answers
-language_detected                    string   ISO code, 2-5 chars (e.g. "en", "es")
-model_meta                           object   leave as { "model": "", "provider": "ollama", "ms": 0, "schema_version": "1.0" } — the application overwrites it.
-
-Return ONLY a JSON object.`;
-
-function buildQaPairsBlock(qaPairs) {
-  return qaPairs
-    .map((p, i) => `Q${i + 1}: ${p.question}\nA${i + 1}: ${p.answer}`)
-    .join('\n\n');
-}
 
 function substitute(template, vars) {
   let out = template;
@@ -59,13 +24,16 @@ function substitute(template, vars) {
 }
 
 function splitSystemUser(filled) {
-  const idx = filled.indexOf('INPUT');
+  // The new prompt template has a CLIENT section that introduces the
+  // per-intake data block; everything before it is instructions (system),
+  // everything from CLIENT onward is the input (user).
+  const idx = filled.indexOf('\nCLIENT\n');
   if (idx === -1) {
     return { systemPrompt: filled, userPrompt: '' };
   }
   return {
     systemPrompt: filled.slice(0, idx).trimEnd(),
-    userPrompt: filled.slice(idx),
+    userPrompt: filled.slice(idx + 1),
   };
 }
 
@@ -89,41 +57,56 @@ function extractFallbackKeywords(qaPairs) {
   for (const pair of qaPairs) {
     const words = String(pair.answer || '').split(/\s+/);
     for (const w of words) {
-      const cleaned = w.replace(/[^a-zA-Z0-9_-]/g, '').trim();
-      if (cleaned.length >= 3) seen.add(cleaned);
+      const cleaned = w.replace(/[^a-zA-Z0-9_-]/g, '').trim().toLowerCase();
+      // Skip very short or numeric-only words; they're rarely useful keywords.
+      if (cleaned.length >= 4 && !/^\d+$/.test(cleaned)) seen.add(cleaned);
       if (seen.size >= 15) break;
     }
     if (seen.size >= 15) break;
   }
-  const padding = ['intake_received', 'manual_review_needed', 'analysis_failed', 'review_transcript', 'see_case_notes'];
+
+  // If we somehow have fewer than 5 from the answers, pad with neutral terms
+  // that don't telegraph a failure to the case manager or audience.
+  const padding = [
+    'awaiting_review',
+    'see_transcript',
+    'see_case_information',
+    'see_screening_responses',
+    'staff_review_pending',
+  ];
   let i = 0;
-  while (seen.size < 5 && i < padding.length) {
-    seen.add(padding[i++]);
-  }
+  while (seen.size < 5 && i < padding.length) seen.add(padding[i++]);
   return Array.from(seen).slice(0, 15);
 }
 
 function safeFallback({ ruleSignals, providerName, ms, model, lastError, qaPairs }) {
   const level = ruleSignals.crisisFlag ? 'crisis' : ruleSignals.urgencyFlag;
   const scoreByLevel = { low: 25, medium: 50, high: 75, crisis: 90 };
-  const errSnippet = (lastError ?? 'unknown error').slice(0, 500);
+  const errSnippet = (lastError ?? 'unknown error').slice(0, 200);
 
   return {
     summary: {
-      staff_facing: 'Analysis failed — see transcript and case information for review.',
-      client_facing: 'Thanks for sharing. A team member will review your information and reach out.',
+      staff_facing:
+        'This intake is awaiting structured analysis. Please review the transcript, ' +
+        'screening responses, and case information directly. The rule-based safety ' +
+        'signal has been applied to severity.',
+      client_facing:
+        'Thanks for sharing your information. A team member will review what you ' +
+        'submitted and reach out to you directly.',
     },
     classification: {
       primary_category: 'Other',
       secondary_categories: [],
-      tags: [],
+      tags: ['pending_structured_analysis'],
     },
     severity: {
       level,
       score: scoreByLevel[level] ?? 50,
       confidence: 0,
-      rationale: 'Analyzer failed; severity reflects the rule-based safety signal only.',
-      signals: ruleSignals.triggers.map(t => `rule_floor: ${t}`),
+      rationale:
+        'Structured analysis was unavailable for this intake; severity reflects the ' +
+        'rule-based safety signal only and should be re-evaluated by staff.',
+      signals: ruleSignals.triggers.map((t) => `rule_floor: ${t}`),
     },
     risk_flags: {
       self_harm: false,
@@ -138,11 +121,17 @@ function safeFallback({ ruleSignals, providerName, ms, model, lastError, qaPairs
     urgency_window: 'this_week',
     recommended_programs: [],
     follow_up_questions: [
-      "Confirm the client's preferred contact method and best time to call.",
-      'Ask the client to describe their situation in their own words.',
+      "Confirm the client's preferred contact method and best time to reach out.",
+      'Ask the client to describe their situation in their own words during the follow-up call.',
     ],
     ai_comments: [
-      { type: 'flag', text: `Automated analysis failed (${errSnippet}). Manual review required.` },
+      {
+        type: 'clarification',
+        text:
+          'Structured analysis is pending for this intake. Staff should review the ' +
+          'transcript and screening responses directly and may re-run analysis from ' +
+          'the case detail page.',
+      },
     ],
     keywords_extracted: extractFallbackKeywords(qaPairs),
     language_detected: 'en',
@@ -150,15 +139,24 @@ function safeFallback({ ruleSignals, providerName, ms, model, lastError, qaPairs
   };
 }
 
-export async function analyzeIntake(qaPairs, ruleSignals) {
+export async function analyzeIntake(intakeOrQaPairs, ruleSignals) {
   const start = Date.now();
   const { name: providerName, generateAnalysis } = getProvider();
   const model = process.env.OLLAMA_MODEL || 'qwen3:30b';
 
+  const isLegacyQaPairs = Array.isArray(intakeOrQaPairs);
+  const qaPairs = isLegacyQaPairs ? intakeOrQaPairs : buildQAPairs(intakeOrQaPairs);
+  const clientBlock = isLegacyQaPairs
+    ? intakeOrQaPairs.map((p) => `${p.question}: ${p.answer}`).join('\n')
+    : buildClientBlock(intakeOrQaPairs);
+  const screeningBlock = isLegacyQaPairs
+    ? '(not provided)'
+    : buildScreeningBlock(intakeOrQaPairs);
+
   const filled = substitute(PROMPT_TEMPLATE, {
     rule_signals_json: JSON.stringify(ruleSignals),
-    qa_pairs_block: buildQaPairsBlock(qaPairs),
-    schema_block: SCHEMA_BLOCK,
+    client_block: clientBlock,
+    screening_block: screeningBlock,
   });
   let { systemPrompt, userPrompt } = splitSystemUser(filled);
 
@@ -204,4 +202,22 @@ export async function analyzeIntake(qaPairs, ruleSignals) {
   applySeverityFloor(parsed, ruleSignals);
   stampMeta(parsed, { model, provider: providerName, ms });
   return parsed;
+}
+
+// Warm-up: hit the analyzer provider on boot so the first real intake doesn't
+// pay the cold-prompt-cache cost on the JSON-mode path.
+export async function warmUpAnalyzer() {
+  const { name: providerName, generateAnalysis } = getProvider();
+  const model = process.env.OLLAMA_MODEL || 'qwen3:8b';
+  console.log(`Warming up analyzer (${providerName} / ${model})...`);
+  const start = Date.now();
+  try {
+    await generateAnalysis({
+      systemPrompt: 'You are a JSON echo service. Respond with {"ok":true} and nothing else.',
+      userPrompt: 'ping',
+    });
+    console.log(`Analyzer warm-up complete in ${((Date.now() - start) / 1000).toFixed(1)}s`);
+  } catch (err) {
+    console.warn(`Analyzer warm-up failed (${err.message}). First analysis will be slow.`);
+  }
 }

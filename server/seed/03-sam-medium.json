@@ -1,0 +1,102 @@
+{
+  "id": "ink_seed_03",
+  "createdAt": "2026-05-19T13:00:00.000Z",
+  "status": "submitted",
+  "currentStep": "complete",
+  "isDemoData": true,
+
+  "clientName": "Sam Rivera",
+  "contactPreference": "email: sam.rivera.demo@example.com",
+  "needCategory": "Healthcare",
+  "urgencyFlag": "medium",
+  "crisisFlag": false,
+
+  "structuredAnswers": {
+    "firstName": "Sam",
+    "lastName": "Rivera",
+    "phone": "",
+    "email": "sam.rivera.demo@example.com",
+    "address": "1518 Walnut Street",
+    "city": "Akron",
+    "zip": "44307",
+    "situationSummary": "Type 1 diabetic. My hours at the warehouse got cut and I'm out of insulin until payday — three days. Fridge is mostly empty too. Behind on rent by about a month."
+  },
+
+  "screeningAnswers": {
+    "mental_health":   { "mh_1": 3, "mh_2": 4, "mh_3": 3, "mh_4": 2, "mh_5": 2 },
+    "physical_health": { "ph_1": 4, "ph_2": 4, "ph_3": 2, "ph_4": 2, "ph_5": 1 },
+    "quality_of_life": { "qol_1": 2, "qol_2": 3, "qol_3": 3, "qol_4": 3, "qol_5": 1, "qol_6": 1, "qol_7": 2 }
+  },
+  "screeningComments": {
+    "mental_health":   "",
+    "physical_health": "Stress is making the diabetes harder to manage.",
+    "quality_of_life": "",
+    "general":         "Mainly need help getting the insulin sorted out — the rest I can stretch a little."
+  },
+  "screeningUpdatedAt": "2026-05-19T13:00:00.000Z",
+
+  "transcript": [
+    { "role": "assistant", "content": "Hi Sam — I'm an AI intake assistant. A human case manager will review what we collect. Ready to start?", "step": "greeting" },
+    { "role": "user",      "content": "Yes. I'm out of insulin until Friday.", "step": "ask_name" },
+    { "role": "assistant", "content": "Thanks for telling me. A Hope Connector will email you today about insulin assistance and other supports.", "step": "complete" }
+  ],
+
+  "qaPairs": [
+    { "question": "What is your first name?",                          "answer": "Sam" },
+    { "question": "How would you like us to reach you?",               "answer": "email: sam.rivera.demo@example.com" },
+    { "question": "What kind of help do you need?",                    "answer": "Healthcare (insulin), plus food and behind on rent." },
+    { "question": "Is this urgent or are you planning ahead?",         "answer": "Pretty urgent — I run out of insulin tomorrow morning." },
+    { "question": "Tell me about your situation in your own words.",   "answer": "Type 1 diabetic, lost hours, out of insulin until payday, fridge mostly empty, a month behind on rent." }
+  ],
+
+  "analysis": {
+    "summary": {
+      "staff_facing": "Type 1 diabetic client reports an active insulin gap until payday (Friday), a mostly-empty fridge, and being roughly one month behind on rent after losing warehouse hours. Multi-category stabilization need: insulin assistance is medically time-sensitive; food and rental support reduce ongoing stress. Not currently in medical emergency but the medication gap should be closed within 24 hours.",
+      "client_facing": "Thanks Sam — a Hope Connector will email you today with insulin assistance options, a nearby pantry, and rental help to talk through."
+    },
+    "classification": {
+      "primary_category": "Healthcare",
+      "secondary_categories": ["Food", "Housing"],
+      "tags": ["out_of_insulin", "food_insecure", "behind_on_rent", "lost_hours", "chronic_condition"]
+    },
+    "severity": {
+      "level": "medium",
+      "score": 58,
+      "confidence": 0.8,
+      "rationale": "Active medication gap plus food insecurity plus partial rent arrears — overlapping stabilization needs raise severity, but no acute medical emergency and no eviction notice.",
+      "signals": ["out of insulin until payday", "fridge mostly empty", "one month behind on rent", "lost warehouse hours"]
+    },
+    "risk_flags": {
+      "self_harm": false,
+      "domestic_abuse": false,
+      "child_safety": false,
+      "eviction_imminent": false,
+      "food_insecurity": true,
+      "medical_emergency": false,
+      "substance_abuse": false,
+      "isolation": false
+    },
+    "urgency_window": "this_week",
+    "recommended_programs": [
+      { "name": "Patient assistance program for insulin", "reason": "Client cannot afford insulin refill until payday; bridge the medication gap first.", "source": "hardcoded" },
+      { "name": "SNAP", "reason": "Client reports an empty fridge and lost work hours.", "source": "hardcoded" },
+      { "name": "Local food pantry network", "reason": "Immediate food relief while SNAP is processed.", "source": "directory" },
+      { "name": "Local rental assistance", "reason": "Client is one month behind on rent after reduced hours.", "source": "hardcoded" }
+    ],
+    "follow_up_questions": [
+      "Confirm Sam's exact insulin formulation and how many days of supply remain.",
+      "Ask the dollar amount Sam is behind on rent and the landlord's current stance.",
+      "Ask whether Sam has Medicaid or any current insurance."
+    ],
+    "ai_comments": [
+      { "type": "flag",       "text": "Insulin gap is medically time-sensitive even though Sam did not frame it as an emergency." },
+      { "type": "suggestion", "text": "Pair the insulin assistance referral with SNAP screening on the same call to reduce repeat outreach." },
+      { "type": "context",    "text": "Stress is reportedly worsening Sam's diabetes management; flag for case manager check-in." }
+    ],
+    "keywords_extracted": ["insulin", "Type 1 diabetes", "lost hours", "behind on rent", "fridge empty", "payday Friday", "warehouse"],
+    "language_detected": "en",
+    "model_meta": { "model": "seed", "provider": "mock", "ms": 0, "schema_version": "1.0" }
+  },
+
+  "helpScore": null
+}

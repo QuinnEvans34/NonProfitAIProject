@@ -1,0 +1,100 @@
+{
+  "id": "ink_seed_02",
+  "createdAt": "2026-05-17T14:30:00.000Z",
+  "status": "submitted",
+  "currentStep": "complete",
+  "isDemoData": true,
+
+  "clientName": "Patricia Williams",
+  "contactPreference": "phone: (555) 0188-4407",
+  "needCategory": "Utilities",
+  "urgencyFlag": "medium",
+  "crisisFlag": false,
+
+  "structuredAnswers": {
+    "firstName": "Patricia",
+    "lastName": "Williams",
+    "phone": "(555) 0188-4407",
+    "email": "",
+    "address": "27 Maple Court Apt 3B",
+    "city": "Dayton",
+    "zip": "45402",
+    "situationSummary": "I'm 71 and live on Social Security. I'm two months behind on my heating bill and winter is coming. A neighbor mentioned LIHEAP — I wanted to find out if I qualify."
+  },
+
+  "screeningAnswers": {
+    "mental_health":   { "mh_1": 3, "mh_2": 4, "mh_3": 3, "mh_4": 3, "mh_5": 3 },
+    "physical_health": { "ph_1": 4, "ph_2": 2, "ph_3": 2, "ph_4": 2, "ph_5": 3 },
+    "quality_of_life": { "qol_1": 3, "qol_2": 4, "qol_3": 4, "qol_4": 4, "qol_5": 1, "qol_6": 3, "qol_7": 2 }
+  },
+  "screeningComments": {
+    "mental_health":   "I worry a lot about the bills, especially in winter.",
+    "physical_health": "Stairs are difficult most days. Otherwise I manage.",
+    "quality_of_life": "",
+    "general":         ""
+  },
+  "screeningUpdatedAt": "2026-05-17T14:30:00.000Z",
+
+  "transcript": [
+    { "role": "assistant", "content": "Hi, I'm an AI intake assistant — a human case manager will review what we collect. Ready to start?", "step": "greeting" },
+    { "role": "user",      "content": "Yes, my neighbor told me about you.", "step": "ask_name" },
+    { "role": "assistant", "content": "Thanks Patricia. A Hope Connector will follow up by phone with LIHEAP details.", "step": "complete" }
+  ],
+
+  "qaPairs": [
+    { "question": "What is your first name?",                          "answer": "Patricia" },
+    { "question": "How would you like us to reach you?",               "answer": "phone: (555) 0188-4407" },
+    { "question": "What kind of help do you need?",                    "answer": "Utilities" },
+    { "question": "Is this urgent or are you planning ahead?",         "answer": "It's getting urgent — heating bills are piling up." },
+    { "question": "Tell me about your situation in your own words.",   "answer": "71, on Social Security, two months behind on heating, asking about LIHEAP." }
+  ],
+
+  "analysis": {
+    "summary": {
+      "staff_facing": "Senior client on fixed Social Security income reports she is two months behind on her heating bill heading into winter. Asking about LIHEAP eligibility. Physical health screening flags mobility difficulty (stairs). Recommend LIHEAP application support and weatherization referral; verify whether her landlord allows efficiency upgrades on the unit.",
+      "client_facing": "Thanks Patricia — a Hope Connector will call you to walk through LIHEAP eligibility and connect you with a weatherization program if it fits your home."
+    },
+    "classification": {
+      "primary_category": "Utilities",
+      "secondary_categories": [],
+      "tags": ["liheap_inquiry", "fixed_income", "senior", "behind_on_utilities", "winter_heating", "mobility_difficulty"]
+    },
+    "severity": {
+      "level": "medium",
+      "score": 48,
+      "confidence": 0.78,
+      "rationale": "Client is two months behind on a winter utility, has limited fixed income, and shows mobility constraints — needs timely benefit support but no immediate crisis.",
+      "signals": ["two months behind on heating", "Social Security only income", "winter approaching", "stairs are difficult"]
+    },
+    "risk_flags": {
+      "self_harm": false,
+      "domestic_abuse": false,
+      "child_safety": false,
+      "eviction_imminent": false,
+      "food_insecurity": false,
+      "medical_emergency": false,
+      "substance_abuse": false,
+      "isolation": false
+    },
+    "urgency_window": "this_week",
+    "recommended_programs": [
+      { "name": "LIHEAP", "reason": "Client explicitly asked about LIHEAP eligibility and is behind on heating.", "source": "hardcoded" },
+      { "name": "Weatherization assistance", "reason": "Reduces ongoing heating costs and pairs naturally with LIHEAP.", "source": "hardcoded" },
+      { "name": "Local senior services", "reason": "Client is 71 with mobility difficulty; may benefit from broader senior supports.", "source": "directory" }
+    ],
+    "follow_up_questions": [
+      "Confirm Patricia's exact monthly Social Security income for LIHEAP screening.",
+      "Ask whether her residence is rented or owned to determine which weatherization programs apply.",
+      "Ask if there is a current shut-off notice from the heating utility."
+    ],
+    "ai_comments": [
+      { "type": "context",    "text": "Senior on fixed income — keep written materials large-print and avoid web-only follow-ups." },
+      { "type": "suggestion", "text": "If Patricia is open to it, screen for SNAP at the same visit — heat-or-eat tradeoffs are common in this profile." }
+    ],
+    "keywords_extracted": ["LIHEAP", "heating bill", "two months behind", "Social Security", "winter", "71 years old"],
+    "language_detected": "en",
+    "model_meta": { "model": "seed", "provider": "mock", "ms": 0, "schema_version": "1.0" }
+  },
+
+  "helpScore": null
+}

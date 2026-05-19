@@ -6,6 +6,7 @@ import adminRoutes from './routes/admin.js';
 import reportsRoutes from './routes/reports.js';
 import { seedIfEmpty } from './seed.js';
 import { warmUpModel } from './ollama.js';
+import { warmUpAnalyzer } from './llm/analyzer.js';
 
 const app = express();
 const PORT = 3001;
@@ -32,4 +33,5 @@ app.listen(PORT, () => {
   // Warm up the Ollama model in the background so the first intake
   // doesn't pay the cold-start cost (~15s for qwen3:30b).
   warmUpModel();
+  warmUpAnalyzer();
 });

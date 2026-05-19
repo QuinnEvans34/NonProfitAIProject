@@ -1,0 +1,103 @@
+{
+  "id": "ink_seed_05",
+  "createdAt": "2026-05-19T18:55:00.000Z",
+  "status": "submitted",
+  "currentStep": "complete",
+  "isDemoData": true,
+
+  "clientName": "Alex Chen",
+  "contactPreference": "text: (555) 0119-7732",
+  "needCategory": "Healthcare",
+  "urgencyFlag": "high",
+  "crisisFlag": true,
+
+  "structuredAnswers": {
+    "firstName": "Alex",
+    "lastName": "Chen",
+    "phone": "(555) 0119-7732",
+    "email": "",
+    "address": "",
+    "city": "Columbus",
+    "zip": "43215",
+    "situationSummary": "Couch-surfing with a friend who is asking me to leave by this weekend. I've been thinking about ending things — I just want it to stop. I don't know what to do."
+  },
+
+  "screeningAnswers": {
+    "mental_health":   { "mh_1": 5, "mh_2": 5, "mh_3": 4, "mh_4": 5, "mh_5": 1 },
+    "physical_health": { "ph_1": 3, "ph_2": 4, "ph_3": 1, "ph_4": 1, "ph_5": 1 },
+    "quality_of_life": { "qol_1": 1, "qol_2": 1, "qol_3": 1, "qol_4": 1, "qol_5": 1, "qol_6": 1, "qol_7": 1 }
+  },
+  "screeningComments": {
+    "mental_health":   "I've been thinking about not being here anymore.",
+    "physical_health": "",
+    "quality_of_life": "",
+    "general":         "Text only please. I don't want to talk on the phone right now."
+  },
+  "screeningUpdatedAt": "2026-05-19T18:55:00.000Z",
+
+  "transcript": [
+    { "role": "assistant", "content": "Hi — I'm an AI intake assistant. A human case manager will review what we collect. If you are in immediate danger, please call or text 988. Ready to share what's going on?", "step": "greeting" },
+    { "role": "user",      "content": "I just need somewhere to go. I don't want to be here anymore.", "step": "ask_situation" },
+    { "role": "assistant", "content": "Thank you for trusting me with that, Alex. A Hope Connector will text you very soon. If at any point you feel unsafe, please call or text 988.", "step": "complete" }
+  ],
+
+  "qaPairs": [
+    { "question": "What is your first name?",                          "answer": "Alex" },
+    { "question": "How would you like us to reach you?",               "answer": "text: (555) 0119-7732" },
+    { "question": "What kind of help do you need?",                    "answer": "Mental health support, and somewhere to stay." },
+    { "question": "Is this urgent or are you planning ahead?",         "answer": "Urgent. I'm being asked to leave this weekend." },
+    { "question": "Tell me about your situation in your own words.",   "answer": "Couch-surfing, friend wants me out, I've been thinking about ending things." }
+  ],
+
+  "analysis": {
+    "summary": {
+      "staff_facing": "Client disclosed active suicidal ideation while describing imminent loss of their current couch-surfing arrangement (asked to leave this weekend). They are isolated and prefer text-only contact. Crisis resources must be offered immediately alongside emergency shelter coordination. Severity is high at the analysis level; the application's crisis-flag rule pushes overall urgency to crisis.",
+      "client_facing": "Alex, thank you for trusting us with this. A Hope Connector will text you very soon. If you are in immediate danger or want to talk to someone now, please call or text 988 — they are there for exactly this."
+    },
+    "classification": {
+      "primary_category": "Healthcare",
+      "secondary_categories": ["Housing"],
+      "tags": ["suicidal_ideation", "imminent_homelessness", "couch_surfing", "isolated", "text_only_contact"]
+    },
+    "severity": {
+      "level": "high",
+      "score": 88,
+      "confidence": 0.86,
+      "rationale": "Client disclosed wanting to end their life alongside imminent loss of shelter and reports high isolation — a high-severity case that the application's rule layer floors to crisis via the self-harm flag.",
+      "signals": ["wants it to stop", "thinking about ending things", "asked to leave this weekend", "isolated, no other supports"]
+    },
+    "risk_flags": {
+      "self_harm": true,
+      "domestic_abuse": false,
+      "child_safety": false,
+      "eviction_imminent": false,
+      "food_insecurity": false,
+      "medical_emergency": false,
+      "substance_abuse": false,
+      "isolation": true
+    },
+    "urgency_window": "today",
+    "recommended_programs": [
+      { "name": "988 Suicide and Crisis Lifeline", "reason": "Client disclosed suicidal ideation; provide the crisis line first.", "source": "hardcoded" },
+      { "name": "Local mobile crisis team", "reason": "Mobile crisis can meet Alex in place and de-escalate without forcing transport.", "source": "hardcoded" },
+      { "name": "Local shelter network", "reason": "Couch-surfing arrangement ends this weekend; emergency shelter is needed.", "source": "hardcoded" },
+      { "name": "Local warming center / drop-in center", "reason": "Bridge option if shelter intake takes more than 24 hours.", "source": "directory" }
+    ],
+    "follow_up_questions": [
+      "Ask whether Alex is safe right now and whether they have a specific plan to harm themselves.",
+      "Confirm whether Alex is willing to be connected to a counselor or mobile crisis team today.",
+      "Identify the exact date the friend is asking Alex to leave so shelter intake can be timed.",
+      "Ask whether Alex has any medications they need refilled in the next 7 days."
+    ],
+    "ai_comments": [
+      { "type": "flag",       "text": "Suicidal ideation disclosed — crisis floor applies regardless of LLM severity score." },
+      { "type": "flag",       "text": "Text-only contact requested — do NOT call this client." },
+      { "type": "suggestion", "text": "Lead the client-facing reply with 988 contact info before any benefits-screening conversation." }
+    ],
+    "keywords_extracted": ["want it to stop", "ending things", "couch surfing", "asked to leave", "this weekend", "no other supports"],
+    "language_detected": "en",
+    "model_meta": { "model": "seed", "provider": "mock", "ms": 0, "schema_version": "1.0" }
+  },
+
+  "helpScore": null
+}

@@ -58,6 +58,7 @@ export default function IntakeDetail() {
   // Re-run analysis
   const [reanalyzing, setReanalyzing] = useState(false);
   const [reanalyzeError, setReanalyzeError] = useState('');
+  const [justRan, setJustRan] = useState(false);
 
   // Copy questions toast
   const [copiedQuestions, setCopiedQuestions] = useState(false);
@@ -72,6 +73,12 @@ export default function IntakeDetail() {
     fetchIntake();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (!reanalyzeError) return;
+    const t = setTimeout(() => setReanalyzeError(''), 4000);
+    return () => clearTimeout(t);
+  }, [reanalyzeError]);
 
   async function fetchIntake() {
     setLoading(true);
@@ -113,6 +120,8 @@ export default function IntakeDetail() {
     try {
       const updated = await api.reanalyzeIntake(id);
       hydrateFromIntake(updated);
+      setJustRan(true);
+      setTimeout(() => setJustRan(false), 2000);
     } catch (err) {
       setReanalyzeError(err.message);
     }
@@ -192,6 +201,7 @@ export default function IntakeDetail() {
 
   return (
     <div className="page" style={{ maxWidth: '1100px' }}>
+      <style>{`@keyframes detail-spin { to { transform: rotate(360deg); } }`}</style>
       <Link to="/dashboard" style={backLinkStyle}>&larr; Dashboard</Link>
 
       {/* Header strip */}
@@ -266,8 +276,14 @@ export default function IntakeDetail() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)', gap: 'var(--space-2)' }}>
               <h2 style={sectionTitle}>AI Summary</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                {reanalyzing && (
-                  <span className="typing-dots" style={{ color: 'var(--color-text-tertiary)', fontSize: 'var(--text-sm)' }}>···</span>
+                {justRan && (
+                  <span style={{
+                    color: 'var(--color-success)',
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: 600,
+                  }}>
+                    ✓ Updated
+                  </span>
                 )}
                 <button
                   onClick={handleReanalyze}
@@ -282,8 +298,12 @@ export default function IntakeDetail() {
                     opacity: reanalyzing ? 0.6 : 1,
                   }}
                 >
-                  <RefreshCw size={12} aria-hidden />
-                  {reanalyzing ? 'Re-running...' : 'Re-run analysis'}
+                  <RefreshCw
+                    size={12}
+                    aria-hidden
+                    style={reanalyzing ? { animation: 'detail-spin 1s linear infinite' } : undefined}
+                  />
+                  {reanalyzing ? 'Re-running analysis…' : 'Re-run analysis'}
                 </button>
               </div>
             </div>
@@ -315,9 +335,24 @@ export default function IntakeDetail() {
             )}
 
             {reanalyzeError && (
-              <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--color-sev-high-text)' }}>
-                Error: {reanalyzeError}
-              </p>
+              <div
+                role="alert"
+                style={{
+                  marginTop: 'var(--space-2)',
+                  padding: '0.4rem 0.7rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  background: 'var(--color-sev-high-bg)',
+                  border: '1px solid var(--color-sev-high-border)',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: 'var(--text-xs)',
+                  color: 'var(--color-sev-high-text)',
+                  fontWeight: 500,
+                }}
+              >
+                Re-run failed: {reanalyzeError}
+              </div>
             )}
 
             <p style={{ marginTop: 'var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>

@@ -1,0 +1,99 @@
+{
+  "id": "ink_seed_01",
+  "createdAt": "2026-05-12T15:30:00.000Z",
+  "status": "submitted",
+  "currentStep": "complete",
+  "isDemoData": true,
+
+  "clientName": "Maria Garcia",
+  "contactPreference": "phone: (555) 0142-2391",
+  "needCategory": "Food",
+  "urgencyFlag": "low",
+  "crisisFlag": false,
+
+  "structuredAnswers": {
+    "firstName": "Maria",
+    "lastName": "Garcia",
+    "phone": "(555) 0142-2391",
+    "email": "",
+    "address": "412 Hillside Ave",
+    "city": "Springfield",
+    "zip": "62704",
+    "situationSummary": "I'm a single parent with two kids. My hours at work got cut this month and I'm trying to plan ahead so we don't fall behind on groceries. I heard about food pantry resources and wanted to learn more."
+  },
+
+  "screeningAnswers": {
+    "mental_health":   { "mh_1": 2, "mh_2": 2, "mh_3": 2, "mh_4": 2, "mh_5": 3 },
+    "physical_health": { "ph_1": 1, "ph_2": 4, "ph_3": 3, "ph_4": 3, "ph_5": 3 },
+    "quality_of_life": { "qol_1": 3, "qol_2": 4, "qol_3": 4, "qol_4": 4, "qol_5": 2, "qol_6": 3, "qol_7": 3 }
+  },
+  "screeningComments": {
+    "mental_health":   "",
+    "physical_health": "",
+    "quality_of_life": "",
+    "general":         "Just looking for a steady food pantry option so we can stretch our budget."
+  },
+  "screeningUpdatedAt": "2026-05-12T15:30:00.000Z",
+
+  "transcript": [
+    { "role": "assistant", "content": "Hi! I'm an AI intake assistant — a human case manager will review what we collect. Ready to start?", "step": "greeting" },
+    { "role": "user",      "content": "Yes, ready.", "step": "ask_name" },
+    { "role": "assistant", "content": "Thanks Maria. A Hope Connector will follow up with food pantry options.", "step": "complete" }
+  ],
+
+  "qaPairs": [
+    { "question": "What is your first name?",                          "answer": "Maria" },
+    { "question": "How would you like us to reach you?",               "answer": "phone: (555) 0142-2391" },
+    { "question": "What kind of help do you need?",                    "answer": "Food" },
+    { "question": "Is this urgent or are you planning ahead?",         "answer": "Planning ahead, not urgent right now." },
+    { "question": "Tell me about your situation in your own words.",   "answer": "Single parent, hours got cut, want to plan ahead for groceries." }
+  ],
+
+  "analysis": {
+    "summary": {
+      "staff_facing": "Client is a single parent of two children who reports reduced work hours this month and a tighter household food budget. She is asking about local food pantry options ahead of next month's grocery cycle. No urgency, no risk flags; situation is stable. Pair the pantry referral with a SNAP screening to address underlying budget pressure.",
+      "client_facing": "Thanks Maria — a Hope Connector will reach out by phone to share food pantry options near you and walk through SNAP eligibility if that would help."
+    },
+    "classification": {
+      "primary_category": "Food",
+      "secondary_categories": [],
+      "tags": ["food_pantry_inquiry", "planning_ahead", "single_parent", "budget_tight", "reduced_hours"]
+    },
+    "severity": {
+      "level": "low",
+      "score": 20,
+      "confidence": 0.82,
+      "rationale": "Client is stable and planning ahead — a routine food assistance inquiry with no immediate risk indicators.",
+      "signals": ["planning ahead for groceries", "single parent of two", "reduced hours at work"]
+    },
+    "risk_flags": {
+      "self_harm": false,
+      "domestic_abuse": false,
+      "child_safety": false,
+      "eviction_imminent": false,
+      "food_insecurity": false,
+      "medical_emergency": false,
+      "substance_abuse": false,
+      "isolation": false
+    },
+    "urgency_window": "this_month",
+    "recommended_programs": [
+      { "name": "Local food pantry network", "reason": "Client explicitly asked about pantry options for next month.", "source": "directory" },
+      { "name": "SNAP", "reason": "Client reports a tight budget after reduced hours; may benefit from SNAP screening.", "source": "hardcoded" }
+    ],
+    "follow_up_questions": [
+      "Confirm Maria's preferred pantry day-of-week and time-of-day for follow-up.",
+      "Ask whether the household has any dietary restrictions the pantry should know about.",
+      "Ask if Maria has applied for SNAP in the past 12 months."
+    ],
+    "ai_comments": [
+      { "type": "context",    "text": "Client is in planning mode — no immediate urgency, treat as a routine outreach." },
+      { "type": "suggestion", "text": "Pair the pantry referral with a SNAP screening to address the underlying budget pressure." }
+    ],
+    "keywords_extracted": ["food pantry", "next month", "single parent", "reduced hours", "tight budget", "two kids"],
+    "language_detected": "en",
+    "model_meta": { "model": "seed", "provider": "mock", "ms": 0, "schema_version": "1.0" }
+  },
+
+  "helpScore": null
+}

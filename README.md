@@ -19,7 +19,7 @@ A local-only prototype of an AI-assisted intake and triage system for nonprofit 
 |-------|------|
 | Frontend | React 19, React Router 7, Vite 6 |
 | Backend | Node.js, Express 4 |
-| LLM | Ollama (local), qwen3:30b |
+| LLM | Ollama (local), qwen3:8b (default) |
 | Storage | In-memory (no database) |
 | Dev runner | concurrently |
 
@@ -63,7 +63,7 @@ Leave this running in its own terminal tab. It listens on `http://localhost:1143
 In a separate terminal:
 
 ```bash
-ollama pull qwen3:30b
+ollama pull qwen3:8b
 ```
 
 This downloads ~18 GB. It only needs to happen once.
