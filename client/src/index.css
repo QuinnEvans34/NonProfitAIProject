@@ -1244,13 +1244,11 @@ input:focus, textarea:focus, select:focus {
 }
 
 .landing-logo {
-  height: 48px;
+  height: 72px;
   width: auto;
   display: block;
-}
-
-.landing-logo--footer {
-  height: 56px;
+  filter: drop-shadow(none);
+  mix-blend-mode: multiply;
 }
 
 .landing-header-nav {

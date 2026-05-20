@@ -145,9 +145,6 @@ export default function LandingPage() {
       <footer id="contact" className="landing-footer">
         <div className="landing-footer-inner">
           <div className="landing-footer-brand">
-            <div className="landing-brand">
-              <img src="/logo.png" alt="Hope Connect" className="landing-logo landing-logo--footer" />
-            </div>
             <p className="landing-footer-tagline">
               Connecting community members with food, housing, healthcare, and
               the people who can help.
