@@ -97,7 +97,7 @@ export default function AboutPage() {
         </Link>
         <nav className="landing-header-nav">
           <Link to="/about" className="landing-nav-link landing-nav-link--active">About us</Link>
-          <a href="#contact" className="landing-nav-link">Contact us</a>
+          <Link to="/contact" className="landing-nav-link">Contact us</Link>
           <Link to="/dashboard" className="landing-nav-link">Log in</Link>
           <a href="#" className="landing-btn-donate">Donate</a>
         </nav>

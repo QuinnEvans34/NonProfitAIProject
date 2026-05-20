@@ -21,7 +21,7 @@ export default function LandingPage() {
         </Link>
         <nav className="landing-header-nav">
           <Link to="/about" className="landing-nav-link">About us</Link>
-          <a href="#contact" className="landing-nav-link">Contact us</a>
+          <Link to="/contact" className="landing-nav-link">Contact us</Link>
           <Link to="/dashboard" className="landing-nav-link">Log in</Link>
           {/* TODO: replace with real donation URL */}
           <a href="#" className="landing-btn-donate">Donate</a>
