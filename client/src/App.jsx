@@ -5,6 +5,7 @@ import IntakeDetail from './pages/IntakeDetail.jsx';
 import Admin from './pages/Admin.jsx';
 import Reports from './pages/Reports.jsx';
 import LandingPage from './pages/LandingPage.jsx';
+import AboutPage from './pages/AboutPage.jsx';
 import {
   MessageSquare,
   LayoutDashboard,
@@ -14,7 +15,7 @@ import {
 
 export default function App() {
   const { pathname } = useLocation();
-  const isLanding = pathname === '/home';
+  const isLanding = pathname === '/home' || pathname === '/about';
 
   return (
     <>
@@ -53,6 +54,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<IntakeChat />} />
         <Route path="/home" element={<LandingPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:id" element={<IntakeDetail />} />
         <Route path="/admin" element={<Admin />} />

@@ -20,7 +20,7 @@ export default function LandingPage() {
           <img src="/logo.png" alt="Hope Connect" className="landing-logo" />
         </Link>
         <nav className="landing-header-nav">
-          <a href="#about" className="landing-nav-link">About us</a>
+          <Link to="/about" className="landing-nav-link">About us</Link>
           <a href="#contact" className="landing-nav-link">Contact us</a>
           <Link to="/dashboard" className="landing-nav-link">Log in</Link>
           {/* TODO: replace with real donation URL */}
@@ -166,7 +166,7 @@ export default function LandingPage() {
 
           <div className="landing-footer-col">
             <div className="landing-footer-heading">Organization</div>
-            <a className="landing-footer-link" href="#about">About us</a>
+            <Link className="landing-footer-link" to="/about">About us</Link>
             <Link className="landing-footer-link" to="/dashboard">Staff log in</Link>
             {/* TODO: replace with real donation URL */}
             <a className="landing-footer-link" href="#">Donate</a>
