@@ -1,7 +1,7 @@
 ---
 title: "Hope Connect — Architecture & Compliance Review"
 subtitle: "For Counsel Evaluation"
-author: "Quinn Evans & Ted Roper"
+author: "Quinton Evans & Christian Roper"
 date: "June 2026"
 geometry: margin=1in
 fontsize: 11pt
@@ -12,8 +12,8 @@ documentclass: article
 
 # Hope Connect — Architecture & Compliance Review
 
-**Prepared for:** Counsel retained by the Freebird Foundation (the "Client")
-**Prepared by:** Quinn Evans and Ted Roper, engineering team for Hope Connect
+**Prepared for:** Counsel retained by Jennifer Lane (the "Client")
+**Prepared by:** Quinton Evans and Christian Roper, engineering team for Hope Connect
 **Date:** June 2026
 **Document version:** 1.0
 
@@ -29,7 +29,7 @@ documentclass: article
 
 To counsel:
 
-This document is the architectural specification for Hope Connect, a multi-tenant SaaS for nonprofit case management to be operated by the Freebird Foundation (the "Client"). The engineering team has structured the platform around a conditional non-Business-Associate posture that we believe is defensible but that requires your formal evaluation.
+This document is the architectural specification for Hope Connect, a multi-tenant SaaS for nonprofit case management to be operated by Jennifer Lane (the "Client"). The engineering team has structured the platform around a conditional non-Business-Associate posture that we believe is defensible but that requires your formal evaluation.
 
 The architectural posture rests on a specific design choice we call the **Federated Identity Architecture**: client identifying information is held exclusively by each Tenant Organization in their own existing CRM, never by Hope Connect. Hope Connect's data plane holds only de-identified case data — structured screening responses, AI analyzer output, severity flags, workflow status — joined to client identity only by an opaque Case Identifier that the Tenant generates under 45 CFR § 164.514(c) and whose mapping the Tenant retains exclusively. We believe this architecture supports the position that Hope Connect does not create, receive, maintain, or transmit Protected Health Information as defined at 45 CFR § 160.103, and is therefore not a Business Associate of any Tenant, regardless of whether the Tenant is itself a Covered Entity.
 
@@ -45,7 +45,7 @@ We are asking you to evaluate this position formally. Specifically:
 
 The architecture has been refined through multiple rounds of adversarial review by an independent reviewer. Each round identified specific weaknesses and required substantive revisions. The version presented here is the fourth-round architecture, structured to address the specific issues those reviews surfaced. We are not asking you to validate a draft we have not stress-tested; we are asking you to evaluate one that has already been put through significant scrutiny by a non-attorney reviewer and revised in response.
 
-Timeline: we are targeting production launch with Freebird Foundation as the first Tenant approximately fourteen months from contract signing. The Expert Determination engagement under 45 CFR § 164.514(b)(1) runs in parallel with this legal review. We would appreciate your engagement letter and initial review feedback within four weeks of receipt of this document.
+Timeline: we are targeting production launch with the first pilot tenant approximately fourteen months from contract signing. The Expert Determination engagement under 45 CFR § 164.514(b)(1) runs in parallel with this legal review. We would appreciate your engagement letter and initial review feedback within four weeks of receipt of this document.
 
 The attached `LEGAL_ARCHITECTURE_V4.md` is the engineering specification underlying this document. This Review is a restructured, attorney-facing presentation of that material plus the new Master Subscription Agreement framework clauses in §7 and the review checklist in §10. Where this Review and `LEGAL_ARCHITECTURE_V4.md` differ in detail, `LEGAL_ARCHITECTURE_V4.md` is authoritative on the engineering specification; this Review is authoritative on the legal framing.
 
@@ -742,7 +742,7 @@ The following are the specific questions for counsel to evaluate. Each is keyed 
 
 ### 10.6 Counsel's overall recommendation
 
-14. Subject to the matters above, does counsel concur that the architecture as specified, the MSA framework in §7, and the Expert Determination engagement described in §6 together support the conditional non-Business-Associate posture for the launch Tenant configuration (Freebird Foundation as a non-covered-entity nonprofit)?
+14. Subject to the matters above, does counsel concur that the architecture as specified, the MSA framework in §7, and the Expert Determination engagement described in §6 together support the conditional non-Business-Associate posture for a non-covered-entity nonprofit as the first pilot tenant configuration?
 
 15. What additional analysis, documentation, or operational controls would counsel recommend before any production data flows? In particular, are there issues that should block Phase 3 launch even after the Expert Determination is complete?
 

@@ -1,7 +1,7 @@
 ---
 title: "Hope Connect — Engineering Proposal"
 subtitle: "Three-Phase Delivery Plan and Architecture"
-author: "Quinn Evans & Ted Roper"
+author: "Quinton Evans & Christian Roper"
 date: "June 2026"
 geometry: margin=1in
 fontsize: 11pt
@@ -12,12 +12,14 @@ documentclass: article
 
 # Hope Connect — Engineering Proposal
 
-**Prepared by (Engineering Team):** Quinn Evans & Ted Roper (the "Engineering Team" / Service Provider)
-**Prepared for (Client):** Freebird Foundation — owner and operator of the Platform (the "Client")
-**Product:** Hope Connect (the "Platform")
-**Launch tenant:** First pilot tenant — to be determined
+*Companion to the Hope Connect Statement of Work and the Architecture & Compliance Review.*
+
+**Prepared by (Engineering Team):** Quinton Evans & Christian Roper (the "Engineering Team" / Service Provider)
+**Prepared for (Client):** Jennifer Lane — owner and operator of the Platform (the "Client")
+**Product:** [Name TBD] (the "Platform"; referred to throughout this proposal by its working name, Hope Connect)
+**Launch tenant:** First pilot tenant — TBD
 **Document version:** v1.0 (Draft for review)
-**Effective date:** [TBD on execution]
+**Effective date:** TBD
 **Estimated duration:** Approximately 14 months across three phases
 
 **Accompanying documents:**
@@ -47,9 +49,9 @@ This document is the engineering and delivery plan. It describes what we are bui
 
 ### 2.1 Engagement structure
 
-The Freebird Foundation (the "Client") is a Charlotte-based nonprofit focused on economic mobility, affordable housing, and immigrant support. The Client is commissioning the Hope Connect Platform from the Engineering Team and will own and operate the Platform on completion. The Client will then offer the Platform to additional nonprofit organizations as tenants, with the first pilot tenant to be determined.
+Jennifer Lane (the "Client") is commissioning the Hope Connect Platform from the Engineering Team. The Client will own and operate the Platform on completion and will then offer the Platform to nonprofit organizations as tenants, with the first pilot tenant to be identified before Phase 1 configuration begins. The corporate entity that will hold ownership of the Platform — whether the existing nonprofit, a future for-profit affiliate, or both — is being finalized in parallel with this engagement; the contract is structured to accommodate transfer of ownership to a successor or affiliate entity per the language to be drafted by counsel.
 
-The Engineering Team — Quinn Evans and Ted Roper — is contracted by the Client to design, build, and launch the Platform. Post-launch, the Engineering Team continues under a maintenance retainer described in §7.3.
+The Engineering Team — Quinton Evans and Christian Roper — is contracted by the Client to design, build, and launch the Platform. Post-launch, the Engineering Team continues under a maintenance retainer described in §7.3.
 
 ### 2.2 The prototype and what it demonstrated
 
@@ -64,9 +66,9 @@ Over April and May 2026, the Engineering Team built a working prototype of Hope 
 
 The prototype validated the core analytical loop and surfaced the architectural questions that this proposal answers. It is documented in detail in `PROJECT_STATE.md` for engineering reference.
 
-### 2.3 Service priorities
+### 2.3 Initial service priorities
 
-The Client has identified its primary service priorities, in order: affordable housing, economic mobility (jobs and living wages), immigrant support, food access, youth programs, and transportation. The Platform is designed to serve these categories first and to accommodate additional service categories as the Client and any future tenants identify them.
+The Client has identified initial service priority categories for the Platform's first tenants: affordable housing, economic mobility (jobs and living wages), immigrant support, food access, youth programs, and transportation. The Platform is designed to serve these categories first and to accommodate additional categories as the Client and tenants identify them.
 
 ### 2.4 Strategic decisions reflected in the architecture
 
@@ -246,7 +248,7 @@ Counsel retained by the Client reviews the *Architecture & Compliance Review*, d
 
 ### 7.3 Maintenance retainer
 
-Beginning at Phase 1 completion and continuing through Phase 3 and beyond, the Engineering Team operates under a maintenance retainer covering security patching of dependencies, bug fixes and critical issue response (with a four-hour business-day acknowledgment and 24-hour P1 resolution target), minor feature additions (eight hours or less per feature), compliance maintenance (annual review of privacy policy, terms, vendor list), tier-two tenant support escalation, monthly status reporting, and quarterly business review. The retainer's commercial terms are addressed in the accompanying *Statement of Work*.
+Beginning at Phase 1 completion and continuing through Phase 3 and beyond, the Engineering Team operates under a monthly maintenance retainer covering security patching of dependencies, bug fixes and critical issue response (with a four-hour business-day acknowledgment and 24-hour P1 resolution target), minor feature additions (eight hours or less per feature), compliance maintenance (annual review of privacy policy, terms, vendor list), tier-two tenant support escalation, monthly status reporting, and quarterly business review. Indicative retainer is $1,500–$2,500 per month; the exact figure depends on the agreed response times and coverage hours and is finalized in a maintenance addendum to the *Statement of Work*.
 
 ### 7.4 Hard costs paid by the Client
 
@@ -310,7 +312,7 @@ The following items are explicitly out of scope for the engagement described in 
 
 ### 9.1 Engineering team
 
-The Engineering Team is Quinn Evans and Ted Roper, operating as a two-person partnership. Both contribute to all phases. The team operates at a sustainable part-time pace, which the fourteen-month calendar reflects.
+The Engineering Team is Quinton Evans and Christian Roper, operating as a two-person partnership. Both contribute to all phases. The team operates at a sustainable part-time pace, which the fourteen-month calendar reflects.
 
 ### 9.2 The prototype as evidence of capability
 
@@ -336,7 +338,9 @@ The following sequence brings this engagement from proposal acceptance to engine
 
 3. **Expert Determination engagement (if elected).** Per §7.1, the Client and counsel determine whether to commission a qualified Expert Determination firm. If elected, the firm is engaged for the assessment.
 
-4. **Contract execution.** The *Statement of Work* is signed by the Client and the Engineering Team.
+4. **First pilot tenant identification.** The Client identifies the first pilot tenant before Phase 1 configuration begins (an organization using Google Sheets or a connector available at its deployment).
+
+5. **Contract execution.** The *Statement of Work* is signed by the Client and the Engineering Team. Each sub-phase invoice is paid before that sub-phase's work begins, per the schedule in the SOW.
 
 5. **Engineering kickoff.** Phase 1 work begins. The Expert Determination and counsel engagements continue in parallel through months one through three of Phase 1.
 
