@@ -1,0 +1,119 @@
+digraph SystemArchitecture {
+  rankdir=TB;
+  compound=true;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.4, ranksep=0.6, pad="0.5"];
+  node  [fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── Users ──────────────────────────────────────────────
+  subgraph cluster_users {
+    label = "End users";
+    style = "rounded,filled";
+    fillcolor = "#E3F2FD";
+    color = "#1565C0";
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#BBDEFB", color="#1565C0"];
+
+    Client [label="Client\n(intake)"];
+    CM     [label="Case Manager"];
+    OA     [label="Tenant Org Admin"];
+    TA     [label="THC Master Admin"];
+  }
+
+  // ─── Browser join point ────────────────────────────────
+  subgraph cluster_browser {
+    label = "Case Manager Browser\n(the ONLY place identity + case data meet)";
+    style = "rounded,filled,bold";
+    fillcolor = "#FCE4EC";
+    color = "#AD1457";
+    penwidth = 2.5;
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#F8BBD0", color="#AD1457"];
+
+    UI [label="Hope Connect\nCase Manager UI"];
+  }
+
+  // ─── Edge ───────────────────────────────────────────────
+  subgraph cluster_edge {
+    label = "Edge layer";
+    style = "rounded,filled";
+    fillcolor = "#FFF8E1";
+    color = "#F57F17";
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#FFE082", color="#F57F17"];
+
+    CF [label="Cloudflare\nDNS · CDN · WAF · DDoS"];
+  }
+
+  // ─── Hope Connect Platform ─────────────────────────────
+  subgraph cluster_thc {
+    label = "Hope Connect Platform — AWS\n(no PII stored)";
+    style = "rounded,filled";
+    fillcolor = "#E8F5E9";
+    color = "#2E7D32";
+    penwidth = 1.5;
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#C8E6C9", color="#2E7D32"];
+
+    API     [label="Express API\nECS Fargate"];
+    Workers [label="Background workers\nBullMQ on Redis"];
+    DB      [shape=cylinder, fillcolor="#A5D6A7", label="Postgres (RDS)\nNO PII\nrow-level security"];
+    Redis   [shape=cylinder, fillcolor="#A5D6A7", label="ElastiCache\nsessions · replay\nmarkers"];
+    Audit   [shape=cylinder, fillcolor="#A5D6A7", label="Audit log\n(year only)"];
+    S3      [shape=cylinder, fillcolor="#A5D6A7", label="S3\nbranding\nexports"];
+  }
+
+  // ─── LLM ───────────────────────────────────────────────
+  subgraph cluster_llm {
+    label = "AI Analyzer Layer";
+    style = "rounded,filled";
+    fillcolor = "#F3E5F5";
+    color = "#6A1B9A";
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#E1BEE7", color="#6A1B9A"];
+
+    LLM [label="Anthropic Claude\nor equivalent LLM\n\nReceives ONLY structured\nde-identified inputs"];
+  }
+
+  // ─── Tenant's Systems (outside Hope Connect) ───────────
+  subgraph cluster_tenant {
+    label = "Tenant Organization's Systems\n(OUTSIDE Hope Connect — owned by the tenant)";
+    style = "rounded,filled,bold,dashed";
+    fillcolor = "#FFEBEE";
+    color = "#C62828";
+    penwidth = 2.5;
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#FFCDD2", color="#C62828"];
+
+    TenantPortal [label="Tenant intake portal\n(tenant.org)"];
+    TenantCRM    [shape=cylinder, label="Tenant's CRM\nSalesforce · HubSpot\nAirtable · Sheets\n\n(holds client identity)"];
+    TenantNotif  [label="Tenant notification\ninfrastructure\n(Twilio, SendGrid, etc.)"];
+  }
+
+  // ─── Edges ──────────────────────────────────────────────
+  Client       -> TenantPortal [label="HTTPS"];
+  TenantPortal -> CF           [label="server-to-server\nde-identified payload"];
+
+  CM -> CF [label="HTTPS"];
+  OA -> CF [label="HTTPS"];
+  TA -> CF [label="HTTPS"];
+
+  CF -> UI;
+  UI -> API       [label="case data\n(Case ID only)", color="#2E7D32", penwidth=2];
+  UI -> TenantCRM [label="identity lookup\n(tenant's OAuth)", style=dashed, color="#C62828", penwidth=2];
+
+  API     -> DB;
+  API     -> Redis;
+  API     -> S3;
+  API     -> Audit;
+  API     -> LLM   [label="structured inputs only\n(no Case ID)"];
+  Workers -> DB;
+  Workers -> LLM;
+  API     -> TenantNotif [label="webhook events\n(Case ID only)", style=dashed];
+}

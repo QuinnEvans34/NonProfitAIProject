@@ -1,0 +1,100 @@
+digraph DeliveryTimeline {
+  rankdir=TB;
+  graph [bgcolor="white", fontname="Helvetica", pad="0.4"];
+  node  [fontname="Helvetica", fontsize=10, shape=plaintext];
+
+  Timeline [label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+      <TR>
+        <TD ROWSPAN="2" BGCOLOR="#37474F"><FONT COLOR="white"><B>Activity</B></FONT></TD>
+        <TD COLSPAN="14" BGCOLOR="#37474F" ALIGN="CENTER"><FONT COLOR="white"><B>Months from contract signing</B></FONT></TD>
+      </TR>
+      <TR>
+        <TD BGCOLOR="#ECEFF1"><B>1</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>2</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>3</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>4</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>5</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>6</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>7</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>8</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>9</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>10</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>11</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>12</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>13</B></TD>
+        <TD BGCOLOR="#ECEFF1"><B>14</B></TD>
+      </TR>
+
+      <TR>
+        <TD ALIGN="LEFT"><B>Phase 1 — MVP for Freebird</B><BR ALIGN="LEFT"/><FONT POINT-SIZE="9">Foundation + single tenant + Google Sheets</FONT></TD>
+        <TD BGCOLOR="#A5D6A7"></TD>
+        <TD BGCOLOR="#A5D6A7"></TD>
+        <TD BGCOLOR="#A5D6A7"></TD>
+        <TD BGCOLOR="#A5D6A7"></TD>
+        <TD BGCOLOR="#A5D6A7"></TD>
+        <TD BGCOLOR="#A5D6A7"></TD>
+        <TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD>
+      </TR>
+
+      <TR>
+        <TD ALIGN="LEFT"><B>Phase 2 — Multi-tenant SaaS framework</B><BR ALIGN="LEFT"/><FONT POINT-SIZE="9">Master admin, tenant admin, Spanish, accessibility</FONT></TD>
+        <TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD>
+        <TD BGCOLOR="#90CAF9"></TD>
+        <TD BGCOLOR="#90CAF9"></TD>
+        <TD BGCOLOR="#90CAF9"></TD>
+        <TD BGCOLOR="#90CAF9"></TD>
+        <TD BGCOLOR="#90CAF9"></TD>
+        <TD></TD><TD></TD><TD></TD>
+      </TR>
+
+      <TR>
+        <TD ALIGN="LEFT"><B>Phase 3 — Connector library + launch</B><BR ALIGN="LEFT"/><FONT POINT-SIZE="9">Airtable, HubSpot, Salesforce, security review, launch</FONT></TD>
+        <TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD>
+        <TD BGCOLOR="#F48FB1"></TD>
+        <TD BGCOLOR="#F48FB1"></TD>
+        <TD BGCOLOR="#F48FB1"></TD>
+      </TR>
+
+      <TR>
+        <TD ALIGN="LEFT" BGCOLOR="#F5F5F5"><FONT POINT-SIZE="9"><I>Expert Determination (parallel)</I></FONT></TD>
+        <TD BGCOLOR="#CE93D8"></TD>
+        <TD BGCOLOR="#CE93D8"></TD>
+        <TD BGCOLOR="#CE93D8"></TD>
+        <TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD>
+      </TR>
+
+      <TR>
+        <TD ALIGN="LEFT" BGCOLOR="#F5F5F5"><FONT POINT-SIZE="9"><I>Counsel engagement (parallel)</I></FONT></TD>
+        <TD BGCOLOR="#CE93D8"></TD>
+        <TD BGCOLOR="#CE93D8"></TD>
+        <TD BGCOLOR="#CE93D8"></TD>
+        <TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD>
+      </TR>
+
+      <TR>
+        <TD ALIGN="LEFT" BGCOLOR="#FFF59D"><B>Milestones</B></TD>
+        <TD></TD><TD></TD><TD></TD><TD></TD><TD></TD>
+        <TD BGCOLOR="#FFC107" ALIGN="CENTER"><B>♦</B></TD>
+        <TD></TD><TD></TD><TD></TD><TD></TD>
+        <TD BGCOLOR="#FFC107" ALIGN="CENTER"><B>♦</B></TD>
+        <TD></TD><TD></TD>
+        <TD BGCOLOR="#FF7043" ALIGN="CENTER"><FONT COLOR="white"><B>★</B></FONT></TD>
+      </TR>
+    </TABLE>
+  >];
+
+  Legend [label=<
+    <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="4">
+      <TR><TD ALIGN="LEFT"><B>Legend:</B></TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT COLOR="#2E7D32">■</FONT> Phase 1 (engineering)</TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT COLOR="#1565C0">■</FONT> Phase 2 (engineering)</TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT COLOR="#AD1457">■</FONT> Phase 3 (engineering)</TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT COLOR="#6A1B9A">■</FONT> Expert Determination + Counsel (parallel)</TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT COLOR="#FFC107">♦</FONT> Phase acceptance milestone</TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT COLOR="#FF7043">★</FONT> Production launch with Freebird Foundation</TD></TR>
+    </TABLE>
+  >];
+
+  Timeline -> Legend [style=invis];
+}

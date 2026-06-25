@@ -1,0 +1,68 @@
+digraph UserRoles {
+  rankdir=LR;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.4, ranksep=0.7, pad="0.4"];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── Client ─────────────────────────────────────────────
+  subgraph cluster_client {
+    label = "Client (seeking help)";
+    style = "rounded,filled";
+    fillcolor = "#E3F2FD";
+    color = "#1565C0";
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#BBDEFB", color="#1565C0", fontsize=9];
+
+    ClientUI    [label="Tenant intake portal\n(on tenant.org)\n\nStructured-only form:\nLikert · dropdowns · tags"];
+    ClientNote  [shape=note, fillcolor="#FFF9C4", color="#F57F17", label="No Hope Connect account\nNo login required"];
+  }
+
+  // ─── Case Manager ───────────────────────────────────────
+  subgraph cluster_cm {
+    label = "Case Manager (Hope Connector)";
+    style = "rounded,filled";
+    fillcolor = "#FCE4EC";
+    color = "#AD1457";
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#F8BBD0", color="#AD1457", fontsize=9];
+
+    CMUI [label="Case manager workspace\n(Tenant wrapper page)\n\nLeft iframe: tenant identity\nRight iframe: case data"];
+    CMActions [shape=note, fillcolor="#FFF9C4", color="#F57F17", label="Review intakes · Approve\nUpdate status · Add tags\nRequest reanalysis"];
+  }
+
+  // ─── Org Admin ──────────────────────────────────────────
+  subgraph cluster_oa {
+    label = "Tenant Org Admin";
+    style = "rounded,filled";
+    fillcolor = "#E8F5E9";
+    color = "#2E7D32";
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#C8E6C9", color="#2E7D32", fontsize=9];
+
+    OAUI [label="Tenant configuration\nin Hope Connect admin\n\nBranding · CRM connection\nQuestion template · Staff"];
+    OANote [shape=note, fillcolor="#FFF9C4", color="#F57F17", label="One admin per tenant\norganization"];
+  }
+
+  // ─── Master Admin ───────────────────────────────────────
+  subgraph cluster_ta {
+    label = "Master Admin (parent company staff)";
+    style = "rounded,filled";
+    fillcolor = "#F3E5F5";
+    color = "#6A1B9A";
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#E1BEE7", color="#6A1B9A", fontsize=9];
+
+    TAUI [label="THC master admin\n\nTenant lifecycle\nQuestion library\nCross-tenant aggregates"];
+    TANote [shape=note, fillcolor="#FFF9C4", color="#F57F17", label="MFA enforced\nAudit-logged actions"];
+  }
+
+  // Invisible edges to keep ordering
+  ClientUI -> ClientNote [style=invis];
+  CMUI -> CMActions [style=invis];
+  OAUI -> OANote [style=invis];
+  TAUI -> TANote [style=invis];
+}

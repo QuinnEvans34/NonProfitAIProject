@@ -1,0 +1,71 @@
+digraph IframeIsolation {
+  rankdir=TB;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.4, ranksep=0.5, pad="0.4"];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── Wrapper page (tenant-hosted) ──────────────────────
+  subgraph cluster_wrapper {
+    label = "Tenant-hosted Wrapper Page\n(origin: cases.<tenant>.example.org)";
+    labelloc = "t";
+    style = "rounded,filled,bold";
+    fillcolor = "#FFF8E1";
+    color = "#F57F17";
+    penwidth = 2.5;
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+
+    // ─── Left iframe — Tenant identity ────────────────────
+    subgraph cluster_iframe_a {
+      label = "IFRAME A — Tenant Identity\n(origin: tenant identity service)";
+      style = "rounded,filled";
+      fillcolor = "#FFCDD2";
+      color = "#C62828";
+      penwidth = 2;
+      fontname = "Helvetica-Bold";
+      fontsize = 10;
+      node [shape=box, style="rounded,filled", fillcolor="#FFAB91", color="#C62828", fontsize=9];
+
+      IframeA [label="Renders client identity:\n• Name\n• Phone, email, address\n• Contact history\n• Narrative notes\n\nCommunicates ONLY\nwith tenant CRM"];
+    }
+
+    // ─── Right iframe — Hope Connect ──────────────────────
+    subgraph cluster_iframe_b {
+      label = "IFRAME B — Hope Connect Case Data\n(origin: hopeconnect.app)";
+      style = "rounded,filled";
+      fillcolor = "#C8E6C9";
+      color = "#2E7D32";
+      penwidth = 2;
+      fontname = "Helvetica-Bold";
+      fontsize = 10;
+      node [shape=box, style="rounded,filled", fillcolor="#A5D6A7", color="#2E7D32", fontsize=9];
+
+      IframeB [label="Renders case data:\n• Severity\n• Screening responses\n• Analyzer output\n• Structured workflow controls\n\nCommunicates ONLY\nwith Hope Connect API"];
+    }
+
+    // ─── The non-link ──────────────────────────────────
+    IframeA -> IframeB [label="NO postMessage\nNO shared state\nNO data exchange", style="dashed", color="#D32F2F", penwidth=2, dir=none, fontcolor="#D32F2F", fontsize=9, fontname="Helvetica-Bold"];
+  }
+
+  // ─── Backends (external) ───────────────────────────────
+  TenantCRM [shape=cylinder, style="rounded,filled", fillcolor="#FFAB91", color="#C62828", label="Tenant CRM"];
+  HCAPI     [shape=box, style="rounded,filled", fillcolor="#A5D6A7", color="#2E7D32", label="Hope Connect API"];
+
+  // ─── Edges ─────────────────────────────────────────────
+  IframeA -> TenantCRM [label="tenant OAuth"];
+  IframeB -> HCAPI     [label="capability token /\ncase session"];
+
+  // ─── Caption with CSP details ──────────────────────────
+  CSP [shape=plaintext, fontsize=9, fontcolor="#37474F",
+    label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" BGCOLOR="#ECEFF1" COLOR="#546E7A">
+    <TR><TD ALIGN="LEFT"><B>Hope Connect iframe (B) CSP enforcement</B></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT FACE="Courier">frame-ancestors</FONT> = exact wrapper origin (no wildcards)</TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT FACE="Courier">connect-src</FONT> = self + api.hopeconnect.app only</TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT FACE="Courier">sandbox</FONT> = allow-scripts allow-same-origin allow-forms</TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT FACE="Courier">Referrer-Policy: no-referrer</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">No general postMessage listener · No session replay</TD></TR>
+    <TR><TD ALIGN="LEFT">Cookies on tenant origins: host-only, __Host- prefix preferred</TD></TR>
+    </TABLE>>];
+
+  IframeB -> CSP [style=invis];
+}

@@ -1,0 +1,85 @@
+digraph MultiTenantModel {
+  rankdir=TB;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.5, ranksep=0.7, pad="0.4"];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── THC Platform (center) ─────────────────────────────
+  subgraph cluster_thc {
+    label = "Hope Connect Platform\n(operated centrally by the parent company)";
+    style = "rounded,filled,bold";
+    fillcolor = "#E8F5E9";
+    color = "#2E7D32";
+    penwidth = 2;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=box, style="rounded,filled", fillcolor="#C8E6C9", color="#2E7D32"];
+
+    Central [label="Centralized\n· Software platform\n· Question library\n· Analyzer pipeline\n· Help-score rubric\n· Aggregate analytics"];
+  }
+
+  // ─── Tenant 1 — Freebird ───────────────────────────────
+  subgraph cluster_t1 {
+    label = "Tenant: Freebird Foundation\n(launch tenant)";
+    style = "rounded,filled";
+    fillcolor = "#E3F2FD";
+    color = "#1565C0";
+    fontname = "Helvetica-Bold";
+    fontsize = 10;
+    node [shape=box, style="rounded,filled", fillcolor="#BBDEFB", color="#1565C0", fontsize=9];
+
+    T1Brand [label="Branding\nLogo · Colors · Copy"];
+    T1CRM   [shape=cylinder, label="Identity store\n(Google Sheets)"];
+    T1Staff [label="Case managers"];
+    T1Prog  [label="Program directory"];
+  }
+
+  // ─── Tenant 2 (conceptual) ─────────────────────────────
+  subgraph cluster_t2 {
+    label = "Tenant: Nonprofit #2";
+    style = "rounded,filled";
+    fillcolor = "#FFF3E0";
+    color = "#E65100";
+    fontname = "Helvetica-Bold";
+    fontsize = 10;
+    node [shape=box, style="rounded,filled", fillcolor="#FFE0B2", color="#E65100", fontsize=9];
+
+    T2Brand [label="Branding\nLogo · Colors · Copy"];
+    T2CRM   [shape=cylinder, label="Identity store\n(Airtable)"];
+    T2Staff [label="Case managers"];
+    T2Prog  [label="Program directory"];
+  }
+
+  // ─── Tenant 3 (conceptual) ─────────────────────────────
+  subgraph cluster_t3 {
+    label = "Tenant: Nonprofit #3";
+    style = "rounded,filled";
+    fillcolor = "#F3E5F5";
+    color = "#6A1B9A";
+    fontname = "Helvetica-Bold";
+    fontsize = 10;
+    node [shape=box, style="rounded,filled", fillcolor="#E1BEE7", color="#6A1B9A", fontsize=9];
+
+    T3Brand [label="Branding\nLogo · Colors · Copy"];
+    T3CRM   [shape=cylinder, label="Identity store\n(Salesforce via bridge)"];
+    T3Staff [label="Case managers"];
+    T3Prog  [label="Program directory"];
+  }
+
+  // ─── Edges (tenants connect to central platform) ───────
+  T1CRM -> Central [label="Case ID only\n(de-identified)", color="#1565C0", penwidth=1.5];
+  T2CRM -> Central [label="Case ID only\n(de-identified)", color="#E65100", penwidth=1.5];
+  T3CRM -> Central [label="Case ID only\n(de-identified)", color="#6A1B9A", penwidth=1.5];
+
+  // ─── Caption ──────────────────────────────────────────
+  caption [shape=plaintext, fontsize=10, fontcolor="#37474F",
+    label=<<TABLE BORDER="0" CELLBORDER="0" CELLPADDING="3">
+    <TR><TD ALIGN="LEFT"><B>What's centralized vs per-tenant</B></TD></TR>
+    <TR><TD ALIGN="LEFT">• Centralized: platform, analyzer, question library (parent company manages)</TD></TR>
+    <TR><TD ALIGN="LEFT">• Per-tenant: branding, CRM, case managers, program directory</TD></TR>
+    <TR><TD ALIGN="LEFT">• Tenants share NO data with each other; strict isolation at DB, app, and network layers</TD></TR>
+    <TR><TD ALIGN="LEFT">• Each tenant's identity stays in their own systems — Hope Connect never sees it</TD></TR>
+    </TABLE>>];
+
+  Central -> caption [style=invis];
+}

@@ -1,0 +1,87 @@
+digraph SubprocessorMap {
+  rankdir=TB;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.3, ranksep=0.4, pad="0.4"];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── Hope Connect Platform ─────────────────────────────
+  HC [shape=box, style="rounded,filled,bold", fillcolor="#C8E6C9", color="#2E7D32", penwidth=2, fontname="Helvetica-Bold", fontsize=12,
+      label="Hope Connect Platform"];
+
+  // ─── Subprocessors (pending counsel) ───────────────────
+  subgraph cluster_subproc {
+    label = "Hope Connect Subprocessors\n(All BAA conclusions pending counsel + Expert Determination)";
+    labelloc = "t";
+    style = "rounded,filled";
+    fillcolor = "#FFF8E1";
+    color = "#F57F17";
+    penwidth = 1.5;
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#FFE082", color="#F57F17", fontsize=9];
+
+    CF       [label="Cloudflare\n(edge, WAF, DNS)"];
+    AWS      [label="AWS\nECS · RDS · S3 · ALB\nKMS · CloudWatch\nElastiCache"];
+    Anthropic[label="Anthropic\n(analyzer LLM)"];
+    Clerk    [label="Clerk\n(staff auth)"];
+    Sentry   [label="Sentry / Better Stack\n(observability)"];
+    Postmark [label="Postmark\n(staff email)"];
+    GitHub   [label="GitHub\n(source + CI)"];
+    AWSBak   [label="AWS Backup\n(RDS backups)"];
+  }
+
+  // ─── Professional service providers (conditional) ──────
+  subgraph cluster_prof {
+    label = "Professional Service Providers (conditional, gated PHI access)";
+    labelloc = "t";
+    style = "rounded,filled,dashed";
+    fillcolor = "#F3E5F5";
+    color = "#6A1B9A";
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#E1BEE7", color="#6A1B9A", fontsize=9];
+
+    EDFirm   [label="Expert Determination firm"];
+    Counsel  [label="Legal counsel"];
+    SecRev   [label="Security assessor"];
+    Forensic [label="Forensic firm"];
+  }
+
+  // ─── NOT subprocessors (tenant-operated) ───────────────
+  subgraph cluster_not_subproc {
+    label = "NOT Hope Connect subprocessors\n(operated by each Tenant)";
+    labelloc = "t";
+    style = "rounded,filled,dashed";
+    fillcolor = "#FFEBEE";
+    color = "#C62828";
+    penwidth = 1.5;
+    fontname = "Helvetica-Bold";
+    fontsize = 11;
+    node [shape=box, style="rounded,filled", fillcolor="#FFCDD2", color="#C62828", fontsize=9];
+
+    TenantTwilio  [label="Twilio\n(tenant's account)"];
+    TenantSendG   [label="SendGrid / Postmark\nfor client email\n(tenant's account)"];
+    TenantCRMext  [label="Tenant CRM\n(Salesforce, etc.)"];
+    TenantPortal  [label="Tenant intake portal\nhosting"];
+  }
+
+  // ─── Edges ─────────────────────────────────────────────
+  HC -> CF;
+  HC -> AWS;
+  HC -> Anthropic;
+  HC -> Clerk;
+  HC -> Sentry;
+  HC -> Postmark;
+  HC -> GitHub;
+  HC -> AWSBak;
+
+  HC -> EDFirm   [style=dashed, color="#6A1B9A"];
+  HC -> Counsel  [style=dashed, color="#6A1B9A"];
+  HC -> SecRev   [style=dashed, color="#6A1B9A"];
+  HC -> Forensic [style=dashed, color="#6A1B9A"];
+
+  HC -> TenantTwilio [style=dotted, color="#9E9E9E", arrowhead=none, constraint=false];
+  HC -> TenantSendG  [style=dotted, color="#9E9E9E", arrowhead=none, constraint=false];
+  HC -> TenantCRMext [style=dotted, color="#9E9E9E", arrowhead=none, constraint=false];
+  HC -> TenantPortal [style=dotted, color="#9E9E9E", arrowhead=none, constraint=false];
+}

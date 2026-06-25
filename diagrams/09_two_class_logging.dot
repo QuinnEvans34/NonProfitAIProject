@@ -1,0 +1,54 @@
+digraph TwoClassLogging {
+  rankdir=LR;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.5, ranksep=0.8, pad="0.4"];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── Class 1: Infrastructure logs ──────────────────────
+  subgraph cluster_class1 {
+    label = "Class 1 — Infrastructure Logs";
+    style = "rounded,filled,bold";
+    fillcolor = "#FFF3E0";
+    color = "#E65100";
+    penwidth = 2;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=box, style="rounded,filled", fillcolor="#FFE0B2", color="#E65100", fontsize=9];
+
+    C1Content [label="Contents:\n• Precise timestamps\n• Tenant backend IPs\n• HTTP method, response codes\n• Infrastructure trace IDs\n• Request sizes"];
+    C1Storage [shape=cylinder, label="Storage: AWS CloudWatch\n+ S3 archive (KMS encrypted)\nRetention: 90 days\nAccess: SRE only"];
+    C1NOT [shape=note, fillcolor="#FFCCBC", color="#D84315", label="NOT in Class 1:\n× Case Identifiers\n× Request bodies\n× Authorization headers\n× Capability tokens\n× Tenant-identifying URL paths"];
+
+    C1Content -> C1Storage [style=invis];
+    C1Storage -> C1NOT     [style=invis];
+  }
+
+  // ─── The no-bridge barrier ─────────────────────────────
+  Barrier [shape=plaintext, fontname="Helvetica-Bold", fontsize=12, fontcolor="#D32F2F",
+    label=<<TABLE BORDER="3" CELLBORDER="0" CELLPADDING="8" BGCOLOR="#FFCDD2" COLOR="#D32F2F">
+    <TR><TD ALIGN="CENTER"><B>NO BRIDGE IDENTIFIER</B></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT POINT-SIZE="9">No request ID, trace ID,<BR/>or correlation ID appears<BR/>in both stores.<BR/><BR/>Enforced by:<BR/>• Lint rules<BR/>• Structured logging discipline<BR/>• Periodic audit<BR/><BR/>Case + infra logs are NEVER<BR/>correlated in production.</FONT></TD></TR>
+    </TABLE>>];
+
+  // ─── Class 2: Case audit logs ──────────────────────────
+  subgraph cluster_class2 {
+    label = "Class 2 — Case Audit Logs";
+    style = "rounded,filled,bold";
+    fillcolor = "#E8F5E9";
+    color = "#2E7D32";
+    penwidth = 2;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=box, style="rounded,filled", fillcolor="#C8E6C9", color="#2E7D32", fontsize=9];
+
+    C2Content [label="Contents:\n• Case Identifier\n• Tenant ID, case manager ID\n• Action type\n• Structured action payload\n• Year only (no timestamps)"];
+    C2Storage [shape=cylinder, label="Storage: Postgres\n(append-only enforced)\nRetention: 3 years default\nAccess: tenant admins + audit"];
+    C2NOT [shape=note, fillcolor="#A5D6A7", color="#1B5E20", label="NOT in Class 2:\n× Precise timestamps\n× IPs\n× HTTP-layer metadata\n× Infrastructure trace IDs\n× Bridge identifiers"];
+
+    C2Content -> C2Storage [style=invis];
+    C2Storage -> C2NOT     [style=invis];
+  }
+
+  C1Storage -> Barrier [style=dashed, color="#D32F2F", arrowhead=none, penwidth=1.5];
+  Barrier -> C2Storage [style=dashed, color="#D32F2F", arrowhead=none, penwidth=1.5];
+}

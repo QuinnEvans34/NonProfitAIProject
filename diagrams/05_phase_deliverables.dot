@@ -1,0 +1,51 @@
+digraph PhaseDeliverables {
+  rankdir=LR;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.4, ranksep=0.7, pad="0.4"];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── Phase 1 column ─────────────────────────────────────
+  subgraph cluster_p1 {
+    label = "PHASE 1 — MVP for Freebird\n6 months";
+    style = "rounded,filled,bold";
+    fillcolor = "#E8F5E9";
+    color = "#2E7D32";
+    penwidth = 2;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=note, style="filled", fillcolor="#C8E6C9", color="#2E7D32", fontsize=9];
+
+    P1Items [label="• AWS + Terraform infrastructure\l• Multi-tenant Postgres schema (single tenant active)\l• Clerk authentication + RBAC\l• Two-class logging with lint enforcement\l• Audit log table + middleware\l• Capability tokens + case sessions\l• Federated identity bridge (Google Sheets)\l• Case manager workspace iframe\l• Constrained-generation analyzer\l• Crisis escalation webhook\l• Per-tenant reporting\l• Eval harness expansion\l\l\l\l\lInternal milestone\lNo production launch\l"];
+  }
+
+  // ─── Phase 2 column ─────────────────────────────────────
+  subgraph cluster_p2 {
+    label = "PHASE 2 — Multi-tenant SaaS\n4–5 months";
+    style = "rounded,filled,bold";
+    fillcolor = "#E3F2FD";
+    color = "#1565C0";
+    penwidth = 2;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=note, style="filled", fillcolor="#BBDEFB", color="#1565C0", fontsize=9];
+
+    P2Items [label="• THC master admin UI\l• Tenant org admin panel\l• Per-tenant theming (CSS variables)\l• Question template library\l• Tenant onboarding wizard\l• Stripe billing scaffolding\l• Spanish translation + i18n\l• WCAG 2.1 AA audit + remediation\l• Text-to-speech, font scaling\l• Mobile responsive QA\l• Structured support form\l• Cookie isolation pre-launch testing\l• Documentation framework\l• Per-tenant subdomain deployment\l\l\l\lInternal milestone\lStill no production launch\l"];
+  }
+
+  // ─── Phase 3 column ─────────────────────────────────────
+  subgraph cluster_p3 {
+    label = "PHASE 3 — Connectors + Launch\n2–3 months";
+    style = "rounded,filled,bold";
+    fillcolor = "#FCE4EC";
+    color = "#AD1457";
+    penwidth = 2;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=note, style="filled", fillcolor="#F8BBD0", color="#AD1457", fontsize=9];
+
+    P3Items [label="• Airtable connector (browser-direct)\l• HubSpot connector (browser-direct)\l• Bridge template (Cloudflare Worker)\l• Salesforce connector via bridge\l• Self-service onboarding UI\l• Per-tenant CSP automation\l• Connector documentation\l• Integration test suites\l• External security review\l• Load testing\l• Final vulnerability remediation\l• Production environment promotion\l• Operations runbooks\l• On-call rotation setup\l\l\l\l\lPRODUCTION LAUNCH\lwith Freebird Foundation\l"];
+  }
+
+  P1Items -> P2Items [style=invis];
+  P2Items -> P3Items [style=invis];
+}

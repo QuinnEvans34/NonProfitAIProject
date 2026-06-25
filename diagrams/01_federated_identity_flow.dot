@@ -1,0 +1,68 @@
+digraph FederatedIdentityFlow {
+  rankdir=LR;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.6, ranksep=0.9, pad="0.5"];
+  node  [fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── Tenant CRM ─────────────────────────────────────────
+  subgraph cluster_tenant {
+    label = "Tenant's CRM\n(Salesforce, HubSpot, Airtable, Google Sheets, etc.)";
+    labelloc = "t";
+    style = "rounded,filled,dashed,bold";
+    fillcolor = "#FFEBEE";
+    color = "#C62828";
+    penwidth = 2.5;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=cylinder, style="filled", fillcolor="#FFCDD2", color="#C62828"];
+
+    TenantID [label="Client identity\nName · Phone\nAddress · Contact history\n\n+ Case ID (lookup key)"];
+  }
+
+  // ─── Case Manager Browser ────────────────────────────────
+  subgraph cluster_browser {
+    label = "Case Manager Browser\n(the ONLY place identity + case data are seen together)";
+    style = "rounded,filled,bold";
+    fillcolor = "#FCE4EC";
+    color = "#AD1457";
+    penwidth = 3;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=box, style="rounded,filled", fillcolor="#F8BBD0", color="#AD1457"];
+
+    Wrapper [label="Tenant wrapper page\n(side-by-side iframes)"];
+  }
+
+  // ─── Hope Connect Platform ───────────────────────────────
+  subgraph cluster_thc {
+    label = "Hope Connect Platform\n(holds NO personally identifying information)";
+    labelloc = "t";
+    style = "rounded,filled";
+    fillcolor = "#E8F5E9";
+    color = "#2E7D32";
+    penwidth = 2;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=cylinder, style="filled", fillcolor="#A5D6A7", color="#2E7D32"];
+
+    HCData [label="Case data\nCase ID · Screening\nSeverity · Help score\nAnalyzer output\nWorkflow status"];
+  }
+
+  // ─── Edges ──────────────────────────────────────────────
+  TenantID -> Wrapper [label="  identity\n  (tenant's OAuth,\n  browser-direct)", style=dashed, color="#C62828", penwidth=2.0, fontcolor="#C62828"];
+  HCData -> Wrapper   [label="  case data\n  (Case ID only,\n  no identity)", color="#2E7D32", penwidth=2.0, fontcolor="#2E7D32"];
+
+  // The conceptual non-link between Tenant CRM and Hope Connect
+  TenantID -> HCData [label="NO direct connection\n(only the Case ID is shared)", style="dotted", color="#9E9E9E", arrowhead=none, penwidth=1.5, fontcolor="#9E9E9E", constraint=false];
+
+  // Caption
+  caption [shape=plaintext, fontsize=10, fontcolor="#37474F",
+    label=<<TABLE BORDER="0" CELLBORDER="0" CELLPADDING="2">
+    <TR><TD ALIGN="LEFT"><B>What flows where</B></TD></TR>
+    <TR><TD ALIGN="LEFT">• Client identity stays in the tenant's CRM</TD></TR>
+    <TR><TD ALIGN="LEFT">• Hope Connect receives only de-identified case data + an opaque Case ID</TD></TR>
+    <TR><TD ALIGN="LEFT">• The browser fetches both halves and renders them side-by-side</TD></TR>
+    <TR><TD ALIGN="LEFT">• The two systems share ONLY the Case ID; no other linkage exists</TD></TR>
+    </TABLE>>];
+  Wrapper -> caption [style=invis];
+}

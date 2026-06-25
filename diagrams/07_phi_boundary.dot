@@ -1,0 +1,58 @@
+digraph PHIBoundary {
+  rankdir=LR;
+  graph [bgcolor="white", fontname="Helvetica", nodesep=0.4, ranksep=0.6, pad="0.4"];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9, color="#546E7A"];
+
+  // ─── Tenant side (PHI exists here) ─────────────────────
+  subgraph cluster_tenant_side {
+    label = "TENANT SIDE — PHI exists here\n(Tenant's HIPAA responsibility)";
+    labelloc = "t";
+    style = "rounded,filled,bold,dashed";
+    fillcolor = "#FFEBEE";
+    color = "#C62828";
+    penwidth = 3;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=box, style="rounded,filled", fillcolor="#FFCDD2", color="#C62828", fontsize=9];
+
+    Client       [label="Client"];
+    TenantPortal [label="Tenant intake portal\n(on tenant.org)"];
+    TenantBE     [label="Tenant backend\n• Generates Case ID\n• Strips network metadata\n• Truncates dates to year"];
+    TenantCRM    [shape=cylinder, label="Tenant CRM\n(Case ID → identity)"];
+
+    Client       -> TenantPortal [label="structured input\nLikert · enums · tags"];
+    TenantPortal -> TenantBE     [label="form submission\n(contains PHI)"];
+    TenantBE     -> TenantCRM    [label="stores identity\n+ Case ID"];
+  }
+
+  // ─── De-identification boundary ────────────────────────
+  Boundary [shape=plaintext, fontname="Helvetica-Bold", fontsize=11, fontcolor="#C62828",
+    label=<<TABLE BORDER="2" CELLBORDER="0" CELLPADDING="6" BGCOLOR="#FFF59D" COLOR="#F57F17">
+    <TR><TD>DE-IDENTIFICATION<BR/>BOUNDARY<BR/><BR/><FONT POINT-SIZE="9">Tenant performs § 164.514(b)<BR/>de-identification here<BR/><BR/>Only the Case ID and<BR/>de-identified Case Data<BR/>cross this boundary</FONT></TD></TR>
+    </TABLE>>];
+
+  // ─── Hope Connect side (no PHI) ────────────────────────
+  subgraph cluster_hc_side {
+    label = "HOPE CONNECT SIDE — NO PHI\n(conditional non-Business-Associate posture)";
+    labelloc = "t";
+    style = "rounded,filled,bold";
+    fillcolor = "#E8F5E9";
+    color = "#2E7D32";
+    penwidth = 3;
+    fontname = "Helvetica-Bold";
+    fontsize = 12;
+    node [shape=box, style="rounded,filled", fillcolor="#C8E6C9", color="#2E7D32", fontsize=9];
+
+    HCAPI    [label="Hope Connect API\n• Schema validation\n• Signature discard\n• Year-only persistence"];
+    HCDB     [shape=cylinder, label="Hope Connect DB\nCase ID + screening\n+ analyzer output\n+ workflow status"];
+    HCLLM    [label="Analyzer LLM\n(structured inputs only,\nNO Case ID transmitted)"];
+
+    HCAPI -> HCDB;
+    HCAPI -> HCLLM [label="structured input\n(no identifiers)"];
+  }
+
+  // ─── Boundary edges ────────────────────────────────────
+  TenantBE -> Boundary [color="#C62828", penwidth=2];
+  Boundary -> HCAPI    [label="Case ID +\nde-identified payload\n(server-to-server TLS)", color="#2E7D32", penwidth=2];
+}
